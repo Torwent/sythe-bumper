@@ -25,7 +25,7 @@ async function run() {
 	try {
 		const isLogged = await xenNode.checkLogin(cookies)
 		console.log(isLogged)
-	} catch (error: any) {
+	} catch (error) {
 		console.error(error) //?? this prints but post is made.
 	}
 
