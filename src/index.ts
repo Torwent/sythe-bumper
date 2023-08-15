@@ -32,7 +32,8 @@ async function run() {
 
 	const { data, error } = await supabase
 		.from("scripts_public")
-		.select("title, description, url, categories")
+		.select("title, description, url, categories, published")
+		.eq("published", "True")
 
 	if (error) return console.error(error)
 
@@ -55,9 +56,10 @@ async function run() {
 	for (let i = 0; i < 3; i++) {
 		const url1 = freeItems[i].url
 		const title1 = freeItems[i].title
-		const description1 = freeItems[i].description
+		var description1 = freeItems[i].description.trim()
+		if(!description1.endsWith(".") && !description1.endsWith("!")) description1 = description1 + ".";
 		free = util.format(
-			"%s \n - [URL='https://waspscripts.com/scripts/%s']%s[/URL] - %s.",
+			"%s \n - [URL='https://waspscripts.com/scripts/%s']%s[/URL] - %s",
 			free,
 			url1,
 			title1,
@@ -66,9 +68,10 @@ async function run() {
 
 		const url2 = premiumItems[i].url
 		const title2 = premiumItems[i].title
-		const description2 = premiumItems[i].description
+		var description2 = premiumItems[i].description.trim()
+		if(!description2.endsWith(".") && !description2.endsWith("!")) description2 = description2 + ".";
 		premium = util.format(
-			"%s \n - [URL='https://waspscripts.com/scripts/%s']%s[/URL] - %s.",
+			"%s \n - [URL='https://waspscripts.com/scripts/%s']%s[/URL] - %s",
 			premium,
 			url2,
 			title2,
@@ -77,13 +80,13 @@ async function run() {
 	}
 
 	bumpOutPut = util.format("%s \n\n %s \n\n %s", bumpOutPut, premium, free)
-	//console.log(bumpOutPut)
+	console.log(bumpOutPut)
 
-	try {
-		await xenNode.post(bumpOutPut, threadID)
-	} catch (error: any) {
-		console.log(error)
-	}
+	// try {
+	// 	await xenNode.post(bumpOutPut, threadID)
+	// } catch (error: any) {
+	// 	console.log(error)
+	// }
 }
 
 //Loop throught every 4 hours and 10 min
@@ -91,7 +94,7 @@ const bumpInterval = 4 * 60 * 60 * 1000 + 10 * 60 * 1000
 
 setInterval(async () => {
 	await run()
-}, bumpInterval)
+}, 5000)
 
 interface Item {
 	title: string
