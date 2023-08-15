@@ -80,13 +80,13 @@ async function run() {
 	}
 
 	bumpOutPut = util.format("%s \n\n %s \n\n %s", bumpOutPut, premium, free)
-	console.log(bumpOutPut)
+	//console.log(bumpOutPut)
 
-	// try {
-	// 	await xenNode.post(bumpOutPut, threadID)
-	// } catch (error: any) {
-	// 	console.log(error)
-	// }
+	try {
+		await xenNode.post(bumpOutPut, threadID)
+	} catch (error: any) {
+		console.log(error)
+	}
 }
 
 //Loop throught every 4 hours and 10 min
@@ -94,7 +94,7 @@ const bumpInterval = 4 * 60 * 60 * 1000 + 10 * 60 * 1000
 
 setInterval(async () => {
 	await run()
-}, 5000)
+}, bumpInterval)
 
 interface Item {
 	title: string
