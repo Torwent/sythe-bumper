@@ -1,18 +1,21 @@
-import "dotenv/config"
+import "./lib/alias"
+import env from "$lib/env"
 import { createClient } from "@supabase/supabase-js"
 import XenNode from "xen-node"
 import util from "util"
 
+//Init env Vars
 const options = { auth: { autoRefreshToken: true, persistSession: false } }
 export const supabase = createClient(
-	process.env.SUPABASE_URL || "",
-	process.env.SUPABASE_ANON_KEY || "",
+	env.SUPABASE_URL || "",
+	env.SUPABASE_ANON_KEY || "",
 	options
 )
 
-const username = process.env.SYTHE_USER || ""
-const password = process.env.SYTHE_PASS || ""
-const threadID = process.env.SYTHE_THREAD || ""
+const username = env.SYTHE_USER || ""
+const password = env.SYTHE_PASS || ""
+const threadID = env.SYTHE_THREAD || ""
+const postID = env.SYTHE_POST || ""
 
 const xenNode = new XenNode("https://www.sythe.org/", {
 	verbose: console.log,
@@ -83,7 +86,8 @@ async function run() {
 	//console.log(bumpOutPut)
 
 	try {
-		await xenNode.post(bumpOutPut, threadID)
+		//await xenNode.post(bumpOutPut, threadID)
+		await xenNode.editPost("abcde", `${postID}/save#`)
 	} catch (error: any) {
 		console.log(error)
 	}
@@ -92,9 +96,11 @@ async function run() {
 //Loop throught every 4 hours and 10 min
 const bumpInterval = 4 * 60 * 60 * 1000 + 10 * 60 * 1000
 
-setInterval(async () => {
-	await run()
-}, bumpInterval)
+// setInterval(async () => {
+// 	await run()
+// }, 5000)
+
+run()
 
 interface Item {
 	title: string

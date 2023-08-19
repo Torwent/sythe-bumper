@@ -1,16 +1,10 @@
 version: "3.9"
 
 services:
-  wasp-api:
-    container_name: "sythe-bumper"
+  node-template:
+    container_name: node-template
     build:
       context: .
-      args:
-        SYTHE_USER: $SYTHE_USER
-        SYTHE_PASS: $SYTHE_PASS
-        SYTHE_THREAD: $SYTHE_THREAD
-        SUPABASE_URL: $SUPABASE_URL
-        SUPABASE_ANON_KEY: $SUPABASE_ANON_KEY
     restart: unless-stopped
     env_file:
-      - .env
+      - stack.env

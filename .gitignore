@@ -1,6 +1,6 @@
-dist
-build
 node_modules
+build
 .env
 .env.*
+stack.env
 !.env.example

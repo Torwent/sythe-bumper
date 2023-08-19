@@ -1,14 +1,24 @@
 {
+	"ts-node": { "require": ["tsconfig-paths/register"] },
 	"compilerOptions": {
-		"target": "es2022",
-		"module": "nodenext",
-		"lib": ["es6"],
-		"allowJs": true,
+		"lib": ["ESNext"],
+		"module": "commonjs",
+		"moduleResolution": "Node",
+		"target": "ESNext",
 		"outDir": "build",
-		"rootDir": "src",
-		"strict": true,
-		"noImplicitAny": true,
+		"forceConsistentCasingInFileNames": true,
+		"sourceMap": false,
 		"esModuleInterop": true,
-		"skipLibCheck": true
-	}
+		"experimentalDecorators": true,
+		"emitDecoratorMetadata": true,
+		"allowSyntheticDefaultImports": true,
+		"skipLibCheck": true,
+		"skipDefaultLibCheck": true,
+		"resolveJsonModule": true,
+		"importHelpers": true,
+		"baseUrl": ".",
+		"paths": { "$lib/*": ["./src/lib/*"] }
+	},
+	"include": ["environment.d.ts", "src"],
+	"exclude": ["node_modules", "**/*.spec.ts"]
 }

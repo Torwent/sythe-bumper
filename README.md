@@ -1,2 +1,3 @@
-# sythe bumper
-https://waspscripts.com sythe thread bumper
+# node-template
+
+A clearn nodejs template with some basic tooling pre-setup
