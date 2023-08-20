@@ -40,7 +40,7 @@ async function run() {
 		   stats_simba!left (experience, gold, runtime, levels, unique_users_total, online_users_total)`)
 		.eq("published", "True")
 		
-	console.log(data)
+	//console.log(data)
 
 	if (error) return console.error(error)
 
@@ -50,10 +50,9 @@ async function run() {
 	var premium: string = "[b]Premium:[/b]"
 	var free: string = "[b]Free:[/b]"
 
-
 	//Lists of Items filterd by category
-	var freeItems: Item[] = []
-	var premiumItems: Item[] = []
+	var freeItems: any[] = []
+	var premiumItems: any[] = []
 	data.forEach((item) => {
 		if (item.categories.includes("Free")) freeItems.push(item)
 		else if (item.categories.includes("Premium")) premiumItems.push(item)
@@ -94,7 +93,7 @@ async function run() {
 
 	//Stats a experience, gold e runtimes
 	//Edit Main Post
-	var editPostOutPut: string = `[b]I'm here to invite you guys to the[/b] [URL='https://waspscripts.com/']WaspScripts[/URL].\n\n
+	var editPostOutPut: string = `[CENTER][b]I'm here to invite you guys to the[/b] [URL='https://waspscripts.com/']WaspScripts[/URL].\n\n
 	WaspScripts is a botting website that hosts a collection of scripts for Simba.\n\n
 	All scripts are [color=#FF0000]C[/color][color=#FF9900]o[/color][color=#CBFF00]l[/color][color=#32FF00]o[/color][color=#00FF66]r[/color] [color=#0065FF]o[/color][color=#3200FF]n[/color][color=#CC00FF]l[/color][color=#FF0098]y[/color] and [b]OSRS exclusive[/b].\n\n
 	Being [b]Simba[/b] scripts they are also [b]open source[/b].\n\n
@@ -105,23 +104,29 @@ async function run() {
 	Scripts have a lot of antiban features that can easily be tweaked to your taste and if you need some really heavy tweaking you can always modify the source code.\n\n
 	It's also possible to minimize and use your mouse or bot on multiple accounts thanks to remote input included in SRL.\n\n
 	[b]If you need any help with anything just let me know in discord![/b]\n\n
-	See you guys there!\n\n`
+	See you guys there!\n\n[/CENTER]`
 
-	premium = "[b]Premium:[/b]"
-	free = "[b]Free:[/b]"
+	premium = "[SIZE=7][b]Premium:[/b][/SIZE]"
+	free = "[SIZE=7][b]Free:[/b][/SIZE]"
 
 	//all premium scripts
 	for (let i = 0; i < premiumItems.length; i++) {
 		const url = premiumItems[i].url
 		const title = premiumItems[i].title
 		var description = premiumItems[i].description.trim()
+		const experience = premiumItems[i].stats_simba.experience;
+		const gold = premiumItems[i].stats_simba.gold;
+		const runtime = premiumItems[i].stats_simba.runtime;
 		if(!description.endsWith(".") && !description.endsWith("!")) description = description + ".";
 		premium = util.format(
-			"%s \n - [URL='https://waspscripts.com/scripts/%s']%s[/URL] - %s",
+			"%s\n\n\n - [URL='https://waspscripts.com/scripts/%s']%s[/URL] - %s[INDENT]\n- experience: %s \n- gold: %s \n- runtime: %s [/INDENT]",
 			premium,
 			url,
 			title,
-			description
+			description,
+			experience,
+			gold,
+			runtime
 		)
 	}
 
@@ -130,13 +135,19 @@ async function run() {
 		const url = freeItems[i].url
 		const title = freeItems[i].title
 		var description = freeItems[i].description.trim()
+		const experience = freeItems[i].stats_simba.experience;
+		const gold = freeItems[i].stats_simba.gold;
+		const runtime = freeItems[i].stats_simba.runtime;
 		if(!description.endsWith(".") && !description.endsWith("!")) description = description + ".";
 		free = util.format(
-			"%s \n - [URL='https://waspscripts.com/scripts/%s']%s[/URL] - %s",
+			"%s\n\n\n - [URL='https://waspscripts.com/scripts/%s']%s[/URL] - %s[INDENT]- experience: %s \n- gold: %s \n- runtime: %s [/INDENT]",
 			free,
 			url,
 			title,
-			description
+			description,
+			experience,
+			gold,
+			runtime
 		)
 	}
 
@@ -158,14 +169,7 @@ const bumpInterval = 4 * 60 * 60 * 1000 + 10 * 60 * 1000
 // }, 5000)
 
 run()
-
-interface Item {
-	title: string
-	description: string
-	url: string
-	categories: string[]
-}
-
+  
 function shuffleArray(array: any[]) {
 	for (let i = array.length - 1; i > 0; i--) {
 		const j = Math.floor(Math.random() * (i + 1))
