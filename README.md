@@ -1,3 +1,3 @@
-# node-template
+# sythe-bumper
 
-A clearn nodejs template with some basic tooling pre-setup
+Sythe forum auto-bumper and thread editor
