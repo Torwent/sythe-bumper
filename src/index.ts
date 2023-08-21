@@ -110,8 +110,8 @@ async function editMainPost(
 	[b]If you need any help with anything just let me know in discord![/b]\n\n
 	See you guys there!\n\n[/CENTER]`
 
-	var premium: string = "[SIZE=7][b]Premium:[/b][/SIZE]"
-	var free: string = "[SIZE=7][b]Free:[/b][/SIZE]"
+	var premium: string = "[SIZE=7][b]Free:[/b][/SIZE]"
+	var free: string = "[SIZE=7][b]Premium:[/b][/SIZE]"
 
 	var i: number = 0
 	while (i < freeItems.length || i < premiumItems.length) {
