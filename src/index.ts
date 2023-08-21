@@ -2,7 +2,6 @@ import "./lib/alias"
 import env from "$lib/env"
 import { createClient } from "@supabase/supabase-js"
 import XenNode from "xen-node"
-import util from "util"
 
 //Init env Vars
 const options = { auth: { autoRefreshToken: true, persistSession: false } }
@@ -23,7 +22,37 @@ const xenNode = new XenNode("https://www.sythe.org/", {
 	password: password
 })
 
-async function run() {
+main()
+
+async function main() {
+
+	//Loop throught in..
+	const bumpInterval = 4 * 60 * 60 * 1000 + 10 * 60 * 1000;	//4 h 10 m
+	const editInterval = 5 * 60 * 1000;							//5 m
+	const loginInterval = 24 * 60 * 60 * 1000;					//24 h
+
+	var data = await getData();
+	await login();
+	// await editMainPost(postID, data.freeItems, data.premiumItems, data.totalStatData)
+	// await bumpThread(threadID, data.freeItems, data.premiumItems);
+
+	setInterval(async () => {
+		await login()
+	}, loginInterval)
+
+	setInterval(async () => {
+		data = await getData();
+		await editMainPost(postID, data.freeItems, data.premiumItems, data.totalStatData);
+	}, editInterval)
+
+	setInterval(async () => {
+		await bumpThread(threadID, data.freeItems, data.premiumItems);
+	}, bumpInterval)
+
+}
+
+//login and get cookies
+async function login() {
 	const cookies = (await xenNode.xenLogin(username, password)) as string[]
 
 	try {
@@ -32,6 +61,9 @@ async function run() {
 	} catch (error) {
 		console.error(error) //?? this prints but post is made.
 	}
+}
+
+async function getData() : Promise<{ freeItems: any[], premiumItems: any[], totalStatData: any }>{
 
 	const { data, error } = await supabase.schema("scripts")
 		.from("scripts")
@@ -40,24 +72,15 @@ async function run() {
 		   stats_simba!left (experience, gold, runtime, levels, unique_users_total, online_users_total)`)
 		.eq("published", "True")
 		
-	if (error) return console.error(error)
+	if (error) console.error(error)
 
 	//console.log(data)
 
 	const { data: totalStatData, error: err } = await supabase.rpc("get_stats_total")
 	
-	if (err) return console.error(err)
+	if (err) console.error(err)
 
 	//console.log(totalStatData)
-	
-
-	
-
-	var bumpOutPut: string =
-		"Bump, check out [URL='https://waspscripts.com/']WaspScripts[/URL]. \n\nCheck out some of the scripts we have to offer:"
-
-	var premium: string = "[b]Premium:[/b]"
-	var free: string = "[b]Free:[/b]"
 
 	//Lists of Items filterd by category
 	var freeItems: any[] = []
@@ -67,41 +90,12 @@ async function run() {
 		else if (item.categories.includes("Premium")) premiumItems.push(item)
 	})
 
-	//Bumps
-	shuffleArray(premiumItems)
-	shuffleArray(freeItems)
+	return { freeItems: freeItems, premiumItems: premiumItems, totalStatData: totalStatData };
 
-	for (let i = 0; i < 3; i++) {
-		const url1 = freeItems[i].url
-		const title1 = freeItems[i].title
-		var description1 = freeItems[i].description.trim()
-		if(!description1.endsWith(".") && !description1.endsWith("!")) description1 = description1 + ".";
-		free = util.format(
-			"%s \n - [URL='https://waspscripts.com/scripts/%s']%s[/URL] - %s",
-			free,
-			url1,
-			title1,
-			description1
-		)
+}
 
-		const url2 = premiumItems[i].url
-		const title2 = premiumItems[i].title
-		var description2 = premiumItems[i].description.trim()
-		if(!description2.endsWith(".") && !description2.endsWith("!")) description2 = description2 + ".";
-		premium = util.format(
-			"%s \n - [URL='https://waspscripts.com/scripts/%s']%s[/URL] - %s",
-			premium,
-			url2,
-			title2,
-			description2
-		)
-	}
-
-	bumpOutPut = util.format("%s \n\n %s \n\n %s", bumpOutPut, premium, free)
-	//console.log(bumpOutPut)
-
-	//Stats a experience, gold e runtimes
-	//Edit Main Post
+async function editMainPost(postID: string, premiumItems: any[], freeItems: any[], totalStatData: any) {
+	
 	var editPostOutPut: string = `[CENTER][b]I'm here to invite you guys to the[/b] [URL='https://waspscripts.com/']WaspScripts[/URL].\n\n
 	WaspScripts is a botting website that hosts a collection of scripts for Simba.\n\n
 	All scripts are [color=#FF0000]C[/color][color=#FF9900]o[/color][color=#CBFF00]l[/color][color=#32FF00]o[/color][color=#00FF66]r[/color] [color=#0065FF]o[/color][color=#3200FF]n[/color][color=#CC00FF]l[/color][color=#FF0098]y[/color] and [b]OSRS exclusive[/b].\n\n
@@ -115,28 +109,24 @@ async function run() {
 	[b]If you need any help with anything just let me know in discord![/b]\n\n
 	See you guys there!\n\n[/CENTER]`
 
-	premium = "[SIZE=7][b]Premium:[/b][/SIZE]"
-	free = "[SIZE=7][b]Free:[/b][/SIZE]"
+	var premium: string = "[SIZE=7][b]Premium:[/b][/SIZE]"
+	var free: string = "[SIZE=7][b]Free:[/b][/SIZE]"
 
 	//all premium scripts
 	for (let i = 0; i < premiumItems.length; i++) {
 		const url = premiumItems[i].url
 		const title = premiumItems[i].title
 		var description = premiumItems[i].description.trim()
+		if(!description.endsWith(".") && !description.endsWith("!")) description = description + ".";
+
+		//stats
 		const experience = formatRSNumber(premiumItems[i].stats_simba.experience);
 		const gold = premiumItems[i].stats_simba.gold;
 		const runtime = convertTime(premiumItems[i].stats_simba.runtime);
 		var stats: string = ""
 		if(runtime !== "") stats = `[INDENT]- experience: ${experience} ,gold: ${gold} ,runtime: ${runtime} [/INDENT]`
-		if(!description.endsWith(".") && !description.endsWith("!")) description = description + ".";
-		premium = util.format(
-			"%s\n\n - [URL='https://waspscripts.com/scripts/%s']%s[/URL] - %s %s",
-			premium,
-			url,
-			title,
-			description,
-			stats
-		)
+		
+		premium = `${premium}\n\n - [URL='https://waspscripts.com/scripts/${url}']${title}[/URL] - ${description} ${stats}`;
 	}
 
 	//all free scripts
@@ -144,20 +134,16 @@ async function run() {
 		const url = freeItems[i].url
 		const title = freeItems[i].title
 		var description = freeItems[i].description.trim()
+		if(!description.endsWith(".") && !description.endsWith("!")) description = description + ".";
+
+		//stats
 		const experience = formatRSNumber(freeItems[i].stats_simba.experience);
 		const gold = freeItems[i].stats_simba.gold;
 		const runtime = convertTime(freeItems[i].stats_simba.runtime);
 		var stats: string = ""
 		if(runtime != "") stats = `[INDENT]- experience: ${experience} ,gold: ${gold} ,runtime: ${runtime} [/INDENT]`
-		if(!description.endsWith(".") && !description.endsWith("!")) description = description + ".";
-		free = util.format(
-			"%s\n\n - [URL='https://waspscripts.com/scripts/%s']%s[/URL] - %s %s",
-			free,
-			url,
-			title,
-			description,
-			stats
-		)
+
+		free = `${free}\n\n - [URL='https://waspscripts.com/scripts/${url}']${title}[/URL] - ${description} ${stats}`;
 	}
 
 	
@@ -167,28 +153,51 @@ async function run() {
 	[color=#f97316]Total Gold Earned:[/color] ${formatRSNumber(totalStatData[0].gold)}
 	[color=#f97316]Total Levels Earned:[/color] ${totalStatData[0].levels}
 	[color=#f97316]Total Runtime:[/color] ${convertTime(totalStatData[0].runtime)}
-	[/size][/CENTER]`
-	editPostOutPut = util.format("%s \n\n %s \n\n %s \n\n %s", editPostOutPut, totalStats ,premium, free)
+	[/size][/CENTER]`;
 
+	editPostOutPut = `${editPostOutPut} \n\n ${totalStats} \n\n ${premium} \n\n ${free}`;
+	
 	try {
-		//await xenNode.post(bumpOutPut, threadID)
 		await xenNode.editPost(editPostOutPut, `${postID}/save#`)
-		
-
 	} catch (error: any) {
 		console.log(error)
 	}
 }
 
-//Loop throught every 4 hours and 10 min
-const bumpInterval = 4 * 60 * 60 * 1000 + 10 * 60 * 1000
+//Bumping a thread
+async function bumpThread(threadID : string, premiumItems :any[] , freeItems:any[]){
 
-setInterval(async () => {
-	await run()
-}, bumpInterval)
+	shuffleArray(premiumItems)
+	shuffleArray(freeItems)
 
-//run()
-  
+	var premium: string = "[b]Premium:[/b]"
+	var free: string = "[b]Free:[/b]"
+
+	for (let i = 0; i < 3; i++) {
+		const urlFree = freeItems[i].url
+		const titleFree = freeItems[i].title
+		var descriptionFree = freeItems[i].description.trim()
+		if(!descriptionFree.endsWith(".") && !descriptionFree.endsWith("!")) descriptionFree = descriptionFree + ".";
+		free = `${free} \n - [URL='https://waspscripts.com/scripts/${urlFree}']${titleFree}[/URL] - ${descriptionFree}`
+
+		const urlPremium = premiumItems[i].url
+		const titlePremium = premiumItems[i].title
+		var descriptionPremium = premiumItems[i].description.trim()
+		if(!descriptionPremium.endsWith(".") && !descriptionPremium.endsWith("!")) descriptionPremium = descriptionPremium + ".";
+
+		premium = `${premium} \n - [URL='https://waspscripts.com/scripts/${urlPremium}']${titlePremium}[/URL] - ${descriptionPremium}`
+	}
+
+	var bumpOutPut: string = `Bump, check out [URL='https://waspscripts.com/']WaspScripts[/URL]. \n\nCheck out some of the scripts we have to offer: \n\n ${premium} \n\n ${free}`
+
+	try {
+		await xenNode.post(bumpOutPut, threadID)
+	} catch (error: any) {
+		console.log(error)
+	}
+}
+
+//randomly shuffle a array with Items
 function shuffleArray(array: any[]) {
 	for (let i = array.length - 1; i > 0; i--) {
 		const j = Math.floor(Math.random() * (i + 1))
