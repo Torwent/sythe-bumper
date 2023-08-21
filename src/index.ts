@@ -40,9 +40,18 @@ async function run() {
 		   stats_simba!left (experience, gold, runtime, levels, unique_users_total, online_users_total)`)
 		.eq("published", "True")
 		
+	if (error) return console.error(error)
+
 	//console.log(data)
 
-	if (error) return console.error(error)
+	const { data: totalStatData, error: err } = await supabase.rpc("get_stats_total")
+	
+	if (err) return console.error(err)
+
+	//console.log(totalStatData)
+	
+
+	
 
 	var bumpOutPut: string =
 		"Bump, check out [URL='https://waspscripts.com/']WaspScripts[/URL]. \n\nCheck out some of the scripts we have to offer:"
@@ -114,19 +123,19 @@ async function run() {
 		const url = premiumItems[i].url
 		const title = premiumItems[i].title
 		var description = premiumItems[i].description.trim()
-		const experience = premiumItems[i].stats_simba.experience;
+		const experience = formatRSNumber(premiumItems[i].stats_simba.experience);
 		const gold = premiumItems[i].stats_simba.gold;
-		const runtime = premiumItems[i].stats_simba.runtime;
+		const runtime = convertTime(premiumItems[i].stats_simba.runtime);
+		var stats: string = ""
+		if(runtime !== "") stats = `[INDENT]- experience: ${experience} ,gold: ${gold} ,runtime: ${runtime} [/INDENT]`
 		if(!description.endsWith(".") && !description.endsWith("!")) description = description + ".";
 		premium = util.format(
-			"%s\n\n\n - [URL='https://waspscripts.com/scripts/%s']%s[/URL] - %s[INDENT]\n- experience: %s \n- gold: %s \n- runtime: %s [/INDENT]",
+			"%s\n\n - [URL='https://waspscripts.com/scripts/%s']%s[/URL] - %s %s",
 			premium,
 			url,
 			title,
 			description,
-			experience,
-			gold,
-			runtime
+			stats
 		)
 	}
 
@@ -135,27 +144,37 @@ async function run() {
 		const url = freeItems[i].url
 		const title = freeItems[i].title
 		var description = freeItems[i].description.trim()
-		const experience = freeItems[i].stats_simba.experience;
+		const experience = formatRSNumber(freeItems[i].stats_simba.experience);
 		const gold = freeItems[i].stats_simba.gold;
-		const runtime = freeItems[i].stats_simba.runtime;
+		const runtime = convertTime(freeItems[i].stats_simba.runtime);
+		var stats: string = ""
+		if(runtime != "") stats = `[INDENT]- experience: ${experience} ,gold: ${gold} ,runtime: ${runtime} [/INDENT]`
 		if(!description.endsWith(".") && !description.endsWith("!")) description = description + ".";
 		free = util.format(
-			"%s\n\n\n - [URL='https://waspscripts.com/scripts/%s']%s[/URL] - %s[INDENT]- experience: %s \n- gold: %s \n- runtime: %s [/INDENT]",
+			"%s\n\n - [URL='https://waspscripts.com/scripts/%s']%s[/URL] - %s %s",
 			free,
 			url,
 			title,
 			description,
-			experience,
-			gold,
-			runtime
+			stats
 		)
 	}
 
-	editPostOutPut = util.format("%s \n\n %s \n\n %s", editPostOutPut, premium, free)
+	
+	//totalStats
+	const totalStats : string = `[CENTER][size=7]
+	[color=#f97316]Total Experience Earned:[/color] ${formatRSNumber(totalStatData[0].experience)}
+	[color=#f97316]Total Gold Earned:[/color] ${formatRSNumber(totalStatData[0].gold)}
+	[color=#f97316]Total Levels Earned:[/color] ${totalStatData[0].levels}
+	[color=#f97316]Total Runtime:[/color] ${convertTime(totalStatData[0].runtime)}
+	[/size][/CENTER]`
+	editPostOutPut = util.format("%s \n\n %s \n\n %s \n\n %s", editPostOutPut, totalStats ,premium, free)
 
 	try {
 		//await xenNode.post(bumpOutPut, threadID)
 		await xenNode.editPost(editPostOutPut, `${postID}/save#`)
+		
+
 	} catch (error: any) {
 		console.log(error)
 	}
@@ -164,15 +183,63 @@ async function run() {
 //Loop throught every 4 hours and 10 min
 const bumpInterval = 4 * 60 * 60 * 1000 + 10 * 60 * 1000
 
-// setInterval(async () => {
-// 	await run()
-// }, 5000)
+setInterval(async () => {
+	await run()
+}, bumpInterval)
 
-run()
+//run()
   
 function shuffleArray(array: any[]) {
 	for (let i = array.length - 1; i > 0; i--) {
 		const j = Math.floor(Math.random() * (i + 1))
 		;[array[i], array[j]] = [array[j], array[i]]
 	}
+}
+
+
+function convertTime(t: number): string {
+	let years,
+		days,
+		hours,
+		minutes,
+		seconds,
+		total_days,
+		total_hours,
+		total_minutes,
+		total_seconds: number
+	let result: string = ""
+
+	total_seconds = Math.floor(t / 1000)
+	total_minutes = Math.floor(total_seconds / 60)
+	total_hours = Math.floor(total_minutes / 60)
+	total_days = Math.floor(total_hours / 24)
+
+	years = Math.floor(total_days / 365)
+
+	seconds = total_seconds % 60
+	minutes = total_minutes % 60
+	hours = total_hours % 24
+	days = total_days % 365
+
+	if (years > 0) result += years.toString() + "y "
+	if (days > 0) result += days.toString() + "d "
+	if (hours > 0) result += hours.toString() + "h "
+	if (minutes > 15 && result !== "") result += minutes.toString() + "m"
+
+	if ((days = 0 && seconds > 0)) result += " " + seconds.toString() + "s"
+		
+	return result
+}
+
+function formatRSNumber(n: number): string {
+	let i: number = 0
+	let f: number = n
+	let arr: string[] = ["", "K", "M", "B", "T"]
+
+	while (Math.abs(f) >= 1000) {
+		i++
+		f = f / 1000
+	}
+
+	return parseFloat(f.toFixed(2)).toString() + " " + arr[i]
 }
