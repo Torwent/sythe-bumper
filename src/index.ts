@@ -6,7 +6,7 @@ import { convertTime, formatRSNumber, generateRandomIndices } from "$lib/utils"
 
 //Init env Vars
 const options = { auth: { autoRefreshToken: true, persistSession: false } }
-export const supabase = createClient(env.SUPABASE_URL || "", env.SUPABASE_ANON_KEY || "", options)
+export const supabase = createClient(env.SUPABASE_URL, env.SUPABASE_ANON_KEY, options)
 
 const xenNode = new XenNode("https://www.sythe.org/", {
 	verbose: console.log,
@@ -32,7 +32,7 @@ async function main() {
 	}, loginInterval)
 
 	setInterval(async () => {
-		data = await getData()
+		data = await getData() ?? data
 		await editMainPost(env.SYTHE_POST, data.freeItems, data.premiumItems, data.totalStatData)
 	}, editInterval)
 
@@ -64,13 +64,19 @@ async function getData(): Promise<{ freeItems: any[]; premiumItems: any[]; total
 		)
 		.eq("published", "True")
 
-	if (error) console.error(error)
+	if (error) {
+		console.error(error)
+		return
+	}
 
 	//console.log(data)
 
 	const { data: totalStatData, error: err } = await supabase.rpc("get_stats_total")
 
-	if (err) console.error(err)
+	if (err) {
+		console.error(err)
+		return
+	}
 
 	//console.log(totalStatData)
 
