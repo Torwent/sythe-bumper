@@ -112,38 +112,43 @@ async function editMainPost(postID: string, premiumItems: any[], freeItems: any[
 	var premium: string = "[SIZE=7][b]Premium:[/b][/SIZE]"
 	var free: string = "[SIZE=7][b]Free:[/b][/SIZE]"
 
-	//all premium scripts
-	for (let i = 0; i < premiumItems.length; i++) {
-		const url = premiumItems[i].url
-		const title = premiumItems[i].title
-		var description = premiumItems[i].description.trim()
-		if(!description.endsWith(".") && !description.endsWith("!")) description = description + ".";
+	var i: number = 0;
+	while(i < freeItems.length || i < premiumItems.length){
+		//all free scripts
+		if(i < freeItems.length){
+			const url = freeItems[i].url
+			const title = freeItems[i].title
+			var description = freeItems[i].description.trim()
+			if(!description.endsWith(".") && !description.endsWith("!")) description = description + ".";
 
-		//stats
-		const experience = formatRSNumber(premiumItems[i].stats_simba.experience);
-		const gold = premiumItems[i].stats_simba.gold;
-		const runtime = convertTime(premiumItems[i].stats_simba.runtime);
-		var stats: string = ""
-		if(runtime !== "") stats = `[INDENT]- experience: ${experience} ,gold: ${gold} ,runtime: ${runtime} [/INDENT]`
-		
-		premium = `${premium}\n\n - [URL='https://waspscripts.com/scripts/${url}']${title}[/URL] - ${description} ${stats}`;
-	}
+			//stats
+			const experience = formatRSNumber(freeItems[i].stats_simba.experience);
+			const gold = freeItems[i].stats_simba.gold;
+			const runtime = convertTime(freeItems[i].stats_simba.runtime);
+			var stats: string = ""
+			if(runtime != "") stats = `[INDENT]- experience: ${experience} ,gold: ${gold} ,runtime: ${runtime} [/INDENT]`
 
-	//all free scripts
-	for (let i = 0; i < freeItems.length; i++) {
-		const url = freeItems[i].url
-		const title = freeItems[i].title
-		var description = freeItems[i].description.trim()
-		if(!description.endsWith(".") && !description.endsWith("!")) description = description + ".";
+			free = `${free}\n\n - [URL='https://waspscripts.com/scripts/${url}']${title}[/URL] - ${description} ${stats}`;
+		}
 
-		//stats
-		const experience = formatRSNumber(freeItems[i].stats_simba.experience);
-		const gold = freeItems[i].stats_simba.gold;
-		const runtime = convertTime(freeItems[i].stats_simba.runtime);
-		var stats: string = ""
-		if(runtime != "") stats = `[INDENT]- experience: ${experience} ,gold: ${gold} ,runtime: ${runtime} [/INDENT]`
+		//all premium scripts
+		if(i < premiumItems.length){
+			const url = premiumItems[i].url
+			const title = premiumItems[i].title
+			var description = premiumItems[i].description.trim()
+			if(!description.endsWith(".") && !description.endsWith("!")) description = description + ".";
 
-		free = `${free}\n\n - [URL='https://waspscripts.com/scripts/${url}']${title}[/URL] - ${description} ${stats}`;
+			//stats
+			const experience = formatRSNumber(premiumItems[i].stats_simba.experience);
+			const gold = premiumItems[i].stats_simba.gold;
+			const runtime = convertTime(premiumItems[i].stats_simba.runtime);
+			var stats: string = ""
+			if(runtime !== "") stats = `[INDENT]- experience: ${experience} ,gold: ${gold} ,runtime: ${runtime} [/INDENT]`
+			
+			premium = `${premium}\n\n - [URL='https://waspscripts.com/scripts/${url}']${title}[/URL] - ${description} ${stats}`;
+		}
+
+		i++;
 	}
 
 	
@@ -164,46 +169,52 @@ async function editMainPost(postID: string, premiumItems: any[], freeItems: any[
 	}
 }
 
-//Bumping a thread
-async function bumpThread(threadID : string, premiumItems :any[] , freeItems:any[]){
+//Bump a thread
+async function bumpThread(threadID: string, premiumItems: any[], freeItems: any[]) {
 
-	shuffleArray(premiumItems)
-	shuffleArray(freeItems)
+    const premiumIndices = generateRandomIndices(premiumItems.length, 3);
+    const freeIndices = generateRandomIndices(freeItems.length, 3);
 
-	var premium: string = "[b]Premium:[/b]"
-	var free: string = "[b]Free:[/b]"
+    var premium: string = "[b]Premium:[/b]";
+    var free: string = "[b]Free:[/b]";
 
-	for (let i = 0; i < 3; i++) {
-		const urlFree = freeItems[i].url
-		const titleFree = freeItems[i].title
-		var descriptionFree = freeItems[i].description.trim()
-		if(!descriptionFree.endsWith(".") && !descriptionFree.endsWith("!")) descriptionFree = descriptionFree + ".";
-		free = `${free} \n - [URL='https://waspscripts.com/scripts/${urlFree}']${titleFree}[/URL] - ${descriptionFree}`
+    for (let i = 0; i < 3; i++) {
+        const freeIndex = freeIndices[i];
+        const urlFree = freeItems[freeIndex].url;
+        const titleFree = freeItems[freeIndex].title;
+        var descriptionFree = freeItems[freeIndex].description.trim();
+        if (!descriptionFree.endsWith(".") && !descriptionFree.endsWith("!")) descriptionFree += ".";
+        free = `${free} \n - [URL='https://waspscripts.com/scripts/${urlFree}']${titleFree}[/URL] - ${descriptionFree}`;
 
-		const urlPremium = premiumItems[i].url
-		const titlePremium = premiumItems[i].title
-		var descriptionPremium = premiumItems[i].description.trim()
-		if(!descriptionPremium.endsWith(".") && !descriptionPremium.endsWith("!")) descriptionPremium = descriptionPremium + ".";
+        const premiumIndex = premiumIndices[i];
+        const urlPremium = premiumItems[premiumIndex].url;
+        const titlePremium = premiumItems[premiumIndex].title;
+        var descriptionPremium = premiumItems[premiumIndex].description.trim();
+        if (!descriptionPremium.endsWith(".") && !descriptionPremium.endsWith("!")) descriptionPremium += ".";
 
-		premium = `${premium} \n - [URL='https://waspscripts.com/scripts/${urlPremium}']${titlePremium}[/URL] - ${descriptionPremium}`
-	}
+        premium = `${premium} \n - [URL='https://waspscripts.com/scripts/${urlPremium}']${titlePremium}[/URL] - ${descriptionPremium}`;
+    }
 
-	var bumpOutPut: string = `Bump, check out [URL='https://waspscripts.com/']WaspScripts[/URL]. \n\nCheck out some of the scripts we have to offer: \n\n ${premium} \n\n ${free}`
+    var bumpOutPut: string = `Bump, check out [URL='https://waspscripts.com/']WaspScripts[/URL]. \n\nCheck out some of the scripts we have to offer: \n\n ${premium} \n\n ${free}`;
 
-	try {
-		await xenNode.post(bumpOutPut, threadID)
-	} catch (error: any) {
-		console.log(error)
-	}
+    try {
+        await xenNode.post(bumpOutPut, threadID);
+    } catch (error: any) {
+        console.log(error);
+    }
 }
 
-//randomly shuffle a array with Items
-function shuffleArray(array: any[]) {
-	for (let i = array.length - 1; i > 0; i--) {
-		const j = Math.floor(Math.random() * (i + 1))
-		;[array[i], array[j]] = [array[j], array[i]]
-	}
+function generateRandomIndices(maxIndex: number, count: number): number[] {
+    const indices: number[] = [];
+    while (indices.length < count) {
+        const randomIndex = Math.floor(Math.random() * maxIndex);
+        if (!indices.includes(randomIndex)) {
+            indices.push(randomIndex);
+        }
+    }
+    return indices;
 }
+
 
 
 function convertTime(t: number): string {
