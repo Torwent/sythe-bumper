@@ -134,7 +134,6 @@ async function editMainPost(
 				stats = `[INDENT][SIZE=3]- [B]experience[/B]: ${experience} , [B]gold[/B]: ${gold} , [B]runtime[/B]: ${runtime}[/SIZE][/INDENT]`
 
 			free = `${free}\n\n - [URL='https://waspscripts.com/scripts/${url}']${title}[/URL] - ${description} ${stats}`
-			console.log(free)
 		}
 
 		//all premium scripts
