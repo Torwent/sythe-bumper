@@ -133,7 +133,7 @@ async function editMainPost(
 			if (runtime != "")
 				stats = `[INDENT][SIZE=3]- [B]experience[/B]: ${experience} , [B]gold[/B]: ${gold} , [B]runtime[/B]: ${runtime}[/SIZE][/INDENT]`
 
-			free = `${free}\n\n - [URL='https://waspscripts.com/scripts/${url}']${title}[/URL] - ${description} ${stats}`
+			free = `${free}\n\n - [URL='https://waspscripts.com/scripts/${url}'][B]${title}[/B][/URL] - ${description} ${stats}`
 		}
 
 		//all premium scripts
@@ -149,9 +149,9 @@ async function editMainPost(
 			const runtime = convertTime(premiumItems[i].stats_simba.runtime)
 			let stats: string = ""
 			if (runtime !== "")
-				stats = `[INDENT]- experience: ${experience} ,gold: ${gold} ,runtime: ${runtime} [/INDENT]`
+				stats = `[INDENT][SIZE=3]- [B]experience[/B]: ${experience} , [B]gold[/B]: ${gold} , [B]runtime[/B]: ${runtime}[/SIZE][/INDENT]`
 
-			premium = `${premium}\n\n - [URL='https://waspscripts.com/scripts/${url}']${title}[/URL] - ${description} ${stats}`
+			premium = `${premium}\n\n - [URL='https://waspscripts.com/scripts/${url}'][B]${title}[/B][/URL] - ${description} ${stats}`
 		}
 
 		i++
@@ -192,7 +192,7 @@ async function bumpThread(threadID: string, premiumItems: Script[], freeItems: S
 		const titleFree = freeItems[freeIndex].title
 		let descriptionFree = freeItems[freeIndex].description.trim()
 		if (!descriptionFree.endsWith(".") && !descriptionFree.endsWith("!")) descriptionFree += "."
-		free = `${free} \n - [URL='https://waspscripts.com/scripts/${urlFree}']${titleFree}[/URL] - ${descriptionFree}`
+		free = `${free} \n - [URL='https://waspscripts.com/scripts/${urlFree}'][B]${titleFree}[/B][/URL] - ${descriptionFree}`
 
 		const premiumIndex = premiumIndices[i]
 		const urlPremium = premiumItems[premiumIndex].url
@@ -201,10 +201,10 @@ async function bumpThread(threadID: string, premiumItems: Script[], freeItems: S
 		if (!descriptionPremium.endsWith(".") && !descriptionPremium.endsWith("!"))
 			descriptionPremium += "."
 
-		premium = `${premium} \n - [URL='https://waspscripts.com/scripts/${urlPremium}']${titlePremium}[/URL] - ${descriptionPremium}`
+		premium = `${premium} \n - [URL='https://waspscripts.com/scripts/${urlPremium}'][B]${titlePremium}[/B][/URL] - ${descriptionPremium}`
 	}
 
-	const bumpOutPut: string = `Bump, check out [URL='https://waspscripts.com/']WaspScripts[/URL]. \n\nCheck out some of the scripts we have to offer: \n\n ${premium} \n\n ${free}`
+	const bumpOutPut: string = `Bump, check out [URL='https://waspscripts.com/'][B]WaspScripts[/B][/URL]. \n\nCheck out some of the scripts we have to offer: \n\n ${premium} \n\n ${free}`
 
 	if (env.ENVIRONMENT == "production") {
 		try {
