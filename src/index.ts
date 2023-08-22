@@ -1,12 +1,14 @@
 import "./lib/alias"
 import env from "$lib/env"
 import { createClient } from "@supabase/supabase-js"
+import { Database } from "$lib/types/supabase"
 import XenNode from "xen-node"
 import { convertTime, formatRSNumber, generateRandomIndices } from "$lib/utils"
+import { Script, TotalStats } from "$lib/types/collection"
 
 //Init env Vars
 const options = { auth: { autoRefreshToken: true, persistSession: false } }
-export const supabase = createClient(env.SUPABASE_URL, env.SUPABASE_ANON_KEY, options)
+export const supabase = createClient<Database>(env.SUPABASE_URL, env.SUPABASE_ANON_KEY, options)
 
 const xenNode = new XenNode("https://www.sythe.org/", {
 	verbose: console.log,
@@ -18,27 +20,28 @@ main()
 
 async function main() {
 	//Loop throught in..
-	const bumpInterval = 4 * 60 * 60 * 1000 + 10 * 60 * 1000 //4 h 10 m
-	const editInterval = 5 * 60 * 1000 //5 m
+	const bumpInterval = parseInt(env.BUMP_HOUR_INTERVAL) * 60 * 60 * 1000
+	const editInterval = parseInt(env.EDIT_MINUTE_INTERVAL) * 60 * 1000
 	const loginInterval = 24 * 60 * 60 * 1000 //24 h
 
-	var data = await getData()
+	let data = await getData()
 	await login()
-	// await editMainPost(postID, data.freeItems, data.premiumItems, data.totalStatData)
-	// await bumpThread(threadID, data.freeItems, data.premiumItems);
+	if (env.ENVIRONMENT === "development") {
+		await editMainPost(env.SYTHE_POST, data.premiumItems, data.freeItems, data.totalStatData)
+		await bumpThread(env.SYTHE_THREAD, data.premiumItems, data.freeItems)
+	} else if (env.ENVIRONMENT === "production") {
+		setInterval(async () => await login(), loginInterval)
 
-	setInterval(async () => {
-		await login()
-	}, loginInterval)
+		setInterval(async () => {
+			data = (await getData()) ?? data
+			await editMainPost(env.SYTHE_POST, data.premiumItems, data.freeItems, data.totalStatData)
+		}, editInterval)
 
-	setInterval(async () => {
-		data = await getData() ?? data
-		await editMainPost(env.SYTHE_POST, data.freeItems, data.premiumItems, data.totalStatData)
-	}, editInterval)
-
-	setInterval(async () => {
-		await bumpThread(env.SYTHE_THREAD, data.freeItems, data.premiumItems)
-	}, bumpInterval)
+		setInterval(
+			async () => await bumpThread(env.SYTHE_THREAD, data.premiumItems, data.freeItems),
+			bumpInterval
+		)
+	}
 }
 
 //login and get cookies
@@ -48,56 +51,56 @@ async function login() {
 	try {
 		const isLogged = await xenNode.checkLogin(cookies)
 		console.log(isLogged)
-	} catch (error) {
-		console.error(error)
+	} catch (error: any) {
+		if (error.isAxiosError) console.error(error)
 	}
 }
 
-async function getData(): Promise<{ freeItems: any[]; premiumItems: any[]; totalStatData: any }> {
+async function getData() {
 	const { data, error } = await supabase
 		.schema("scripts")
 		.from("scripts")
 		.select(
-			`id, url, title, description, content, categories, subcategories, published,
-		   protected!left (assets, revision, username, avatar, revision_date, broken),
-		   stats_simba!left (experience, gold, runtime, levels, unique_users_total, online_users_total)`
+			`id, url, title, description, content, categories, published,
+		   protected!left (broken),
+		   stats_simba!left (experience, gold, runtime, levels)`
 		)
 		.eq("published", "True")
+		.eq("protected.broken", "False")
+		.returns<Script[]>()
 
 	if (error) {
 		console.error(error)
 		return
 	}
 
-	//console.log(data)
-
-	const { data: totalStatData, error: err } = await supabase.rpc("get_stats_total")
+	const { data: totalStatData, error: err } = await supabase
+		.rpc("get_stats_total")
+		.returns<TotalStats[]>()
 
 	if (err) {
 		console.error(err)
 		return
 	}
 
-	//console.log(totalStatData)
-
 	//Lists of Items filterd by category
-	var freeItems: any[] = []
-	var premiumItems: any[] = []
+	const freeItems: Script[] = []
+	const premiumItems: Script[] = []
 	data.forEach((item) => {
 		if (item.categories.includes("Free")) freeItems.push(item)
 		else if (item.categories.includes("Premium")) premiumItems.push(item)
 	})
 
-	return { freeItems: freeItems, premiumItems: premiumItems, totalStatData: totalStatData }
+	return { freeItems, premiumItems, totalStatData: totalStatData[0] }
 }
 
 async function editMainPost(
 	postID: string,
-	premiumItems: any[],
-	freeItems: any[],
-	totalStatData: any
+	premiumItems: Script[],
+	freeItems: Script[],
+	totalStatData: TotalStats
 ) {
-	var editPostOutPut: string = `[CENTER][b]I'm here to invite you guys to the[/b] [URL='https://waspscripts.com/']WaspScripts[/URL].\n\n
+	let editPostOutPut: string = `[CENTER][b]I'm here to invite you guys to the[/b] [URL='https://waspscripts.com/']WaspScripts[/URL].\n\n
 	WaspScripts is a botting website that hosts a collection of scripts for Simba.\n\n
 	All scripts are [color=#FF0000]C[/color][color=#FF9900]o[/color][color=#CBFF00]l[/color][color=#32FF00]o[/color][color=#00FF66]r[/color] [color=#0065FF]o[/color][color=#3200FF]n[/color][color=#CC00FF]l[/color][color=#FF0098]y[/color] and [b]OSRS exclusive[/b].\n\n
 	Being [b]Simba[/b] scripts they are also [b]open source[/b].\n\n
@@ -110,41 +113,42 @@ async function editMainPost(
 	[b]If you need any help with anything just let me know in discord![/b]\n\n
 	See you guys there!\n\n[/CENTER]`
 
-	var premium: string = "[SIZE=7][b]Free:[/b][/SIZE]"
-	var free: string = "[SIZE=7][b]Premium:[/b][/SIZE]"
+	let premium: string = "[SIZE=7][b]Premium:[/b][/SIZE]"
+	let free: string = "[SIZE=7][b]Free:[/b][/SIZE]"
 
-	var i: number = 0
+	let i: number = 0
 	while (i < freeItems.length || i < premiumItems.length) {
 		//all free scripts
 		if (i < freeItems.length) {
 			const url = freeItems[i].url
 			const title = freeItems[i].title
-			var description = freeItems[i].description.trim()
+			let description = freeItems[i].description.trim()
 			if (!description.endsWith(".") && !description.endsWith("!")) description = description + "."
 
 			//stats
 			const experience = formatRSNumber(freeItems[i].stats_simba.experience)
 			const gold = freeItems[i].stats_simba.gold
 			const runtime = convertTime(freeItems[i].stats_simba.runtime)
-			var stats: string = ""
+			let stats: string = ""
 			if (runtime != "")
-				stats = `[INDENT]- experience: ${experience} ,gold: ${gold} ,runtime: ${runtime} [/INDENT]`
+				stats = `[INDENT][SIZE=3]- [B]experience[/B]: ${experience} , [B]gold[/B]: ${gold} , [B]runtime[/B]: ${runtime}[/SIZE][/INDENT]`
 
 			free = `${free}\n\n - [URL='https://waspscripts.com/scripts/${url}']${title}[/URL] - ${description} ${stats}`
+			console.log(free)
 		}
 
 		//all premium scripts
 		if (i < premiumItems.length) {
 			const url = premiumItems[i].url
 			const title = premiumItems[i].title
-			var description = premiumItems[i].description.trim()
+			let description = premiumItems[i].description.trim()
 			if (!description.endsWith(".") && !description.endsWith("!")) description = description + "."
 
 			//stats
 			const experience = formatRSNumber(premiumItems[i].stats_simba.experience)
 			const gold = premiumItems[i].stats_simba.gold
 			const runtime = convertTime(premiumItems[i].stats_simba.runtime)
-			var stats: string = ""
+			let stats: string = ""
 			if (runtime !== "")
 				stats = `[INDENT]- experience: ${experience} ,gold: ${gold} ,runtime: ${runtime} [/INDENT]`
 
@@ -156,52 +160,60 @@ async function editMainPost(
 
 	//totalStats
 	const totalStats: string = `[CENTER][size=7]
-	[color=#f97316]Total Experience Earned:[/color] ${formatRSNumber(totalStatData[0].experience)}
-	[color=#f97316]Total Gold Earned:[/color] ${formatRSNumber(totalStatData[0].gold)}
-	[color=#f97316]Total Levels Earned:[/color] ${totalStatData[0].levels}
-	[color=#f97316]Total Runtime:[/color] ${convertTime(totalStatData[0].runtime)}
+	[color=#f97316]Total Experience Earned:[/color] ${formatRSNumber(totalStatData.experience)}
+	[color=#f97316]Total Gold Earned:[/color] ${formatRSNumber(totalStatData.gold)}
+	[color=#f97316]Total Levels Earned:[/color] ${totalStatData.levels}
+	[color=#f97316]Total Runtime:[/color] ${convertTime(totalStatData.runtime)}
 	[/size][/CENTER]`
 
 	editPostOutPut = `${editPostOutPut} \n\n ${totalStats} \n\n ${premium} \n\n ${free}`
 
-	try {
-		await xenNode.editPost(editPostOutPut, `${postID}/save#`)
-	} catch (error: any) {
-		console.log(error)
+	if (env.ENVIRONMENT === "production") {
+		try {
+			await xenNode.editPost(editPostOutPut, `${postID}/save#`)
+		} catch (error: any) {
+			if (error.isAxiosError) console.error(error)
+		}
+	} else if (env.ENVIRONMENT == "development") {
+		console.log(editPostOutPut)
 	}
 }
 
 //Bump a thread
-async function bumpThread(threadID: string, premiumItems: any[], freeItems: any[]) {
+async function bumpThread(threadID: string, premiumItems: Script[], freeItems: Script[]) {
 	const premiumIndices = generateRandomIndices(premiumItems.length, 3)
 	const freeIndices = generateRandomIndices(freeItems.length, 3)
 
-	var premium: string = "[b]Premium:[/b]"
-	var free: string = "[b]Free:[/b]"
+	let premium: string = "[b]Premium:[/b]"
+	let free: string = "[b]Free:[/b]"
 
 	for (let i = 0; i < 3; i++) {
 		const freeIndex = freeIndices[i]
 		const urlFree = freeItems[freeIndex].url
 		const titleFree = freeItems[freeIndex].title
-		var descriptionFree = freeItems[freeIndex].description.trim()
+		let descriptionFree = freeItems[freeIndex].description.trim()
 		if (!descriptionFree.endsWith(".") && !descriptionFree.endsWith("!")) descriptionFree += "."
 		free = `${free} \n - [URL='https://waspscripts.com/scripts/${urlFree}']${titleFree}[/URL] - ${descriptionFree}`
 
 		const premiumIndex = premiumIndices[i]
 		const urlPremium = premiumItems[premiumIndex].url
 		const titlePremium = premiumItems[premiumIndex].title
-		var descriptionPremium = premiumItems[premiumIndex].description.trim()
+		let descriptionPremium = premiumItems[premiumIndex].description.trim()
 		if (!descriptionPremium.endsWith(".") && !descriptionPremium.endsWith("!"))
 			descriptionPremium += "."
 
 		premium = `${premium} \n - [URL='https://waspscripts.com/scripts/${urlPremium}']${titlePremium}[/URL] - ${descriptionPremium}`
 	}
 
-	var bumpOutPut: string = `Bump, check out [URL='https://waspscripts.com/']WaspScripts[/URL]. \n\nCheck out some of the scripts we have to offer: \n\n ${premium} \n\n ${free}`
+	const bumpOutPut: string = `Bump, check out [URL='https://waspscripts.com/']WaspScripts[/URL]. \n\nCheck out some of the scripts we have to offer: \n\n ${premium} \n\n ${free}`
 
-	try {
-		await xenNode.post(bumpOutPut, threadID)
-	} catch (error: any) {
-		console.log(error)
+	if (env.ENVIRONMENT == "production") {
+		try {
+			await xenNode.post(bumpOutPut, threadID)
+		} catch (error: any) {
+			if (error.isAxiosError) console.error(error)
+		}
+	} else if (env.ENVIRONMENT == "development") {
+		console.log(bumpOutPut)
 	}
 }

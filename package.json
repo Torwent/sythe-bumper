@@ -4,9 +4,10 @@
 	"description": "",
 	"main": "index.js",
 	"scripts": {
-		"format": "prettier --plugin-search-dir . --write .",
-		"lint": "prettier --plugin-search-dir . --check . && eslint .",
-		"fix": "prettier --plugin-search-dir . --write . && eslint . --fix",
+		"format": "prettier --write .",
+		"lint": "prettier --check . && eslint .",
+		"fix": "prettier --write . && eslint . --fix",
+		"gentypes": "supabase gen types typescript --linked > src/lib/types/supabase.ts",
 		"start": "ts-node src/index.ts",
 		"dev": "ts-node-dev src/index.ts",
 		"build": "tsc",
@@ -19,6 +20,8 @@
 	"devDependencies": {
 		"@types/module-alias": "^2.0.2",
 		"@types/node": "^20.5.0",
+		"@typescript-eslint/eslint-plugin": "^6.4.1",
+		"@typescript-eslint/parser": "^6.4.1",
 		"dotenv": "^16.3.1",
 		"eslint": "^8.47.0",
 		"eslint-config-prettier": "^9.0.0",
@@ -31,7 +34,7 @@
 		"typescript": "^5.1.6"
 	},
 	"dependencies": {
-		"xen-node": "^1.0.6",
-		"@supabase/supabase-js": "^2.31.0"
+		"@supabase/supabase-js": "^2.31.0",
+		"xen-node": "^1.0.6"
 	}
 }
