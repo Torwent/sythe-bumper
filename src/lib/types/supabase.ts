@@ -1,23 +1,170 @@
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[]
 
-export interface Database {
-	graphql_public: {
+export type Database = {
+	info: {
 		Tables: {
-			[_ in never]: never
+			errors: {
+				Row: {
+					content: string | null
+					created_at: string | null
+					id: number
+					id2: number | null
+					title: string | null
+				}
+				Insert: {
+					content?: string | null
+					created_at?: string | null
+					id?: number
+					id2?: number | null
+					title?: string | null
+				}
+				Update: {
+					content?: string | null
+					created_at?: string | null
+					id?: number
+					id2?: number | null
+					title?: string | null
+				}
+				Relationships: []
+			}
+			privacy_policy: {
+				Row: {
+					content: string
+					created_at: string
+					id: string
+					version: number
+				}
+				Insert: {
+					content: string
+					created_at?: string
+					id?: string
+					version?: number
+				}
+				Update: {
+					content?: string
+					created_at?: string
+					id?: string
+					version?: number
+				}
+				Relationships: []
+			}
+			questions: {
+				Row: {
+					content: string | null
+					created_at: string | null
+					id: number
+					title: string | null
+				}
+				Insert: {
+					content?: string | null
+					created_at?: string | null
+					id?: number
+					title?: string | null
+				}
+				Update: {
+					content?: string | null
+					created_at?: string | null
+					id?: number
+					title?: string | null
+				}
+				Relationships: []
+			}
+			scripter_tos: {
+				Row: {
+					content: string
+					created_at: string
+					id: string
+					version: number
+				}
+				Insert: {
+					content: string
+					created_at?: string
+					id?: string
+					version?: number
+				}
+				Update: {
+					content?: string
+					created_at?: string
+					id?: string
+					version?: number
+				}
+				Relationships: []
+			}
+			tutorials: {
+				Row: {
+					author_id: string
+					content: string
+					created_at: string
+					description: string
+					fts: unknown | null
+					id: string
+					level: number
+					order: number
+					published: boolean
+					search: string | null
+					title: string
+					url: string
+					username: string
+				}
+				Insert: {
+					author_id?: string
+					content: string
+					created_at?: string
+					description: string
+					fts?: unknown | null
+					id?: string
+					level?: number
+					order: number
+					published?: boolean
+					search?: string | null
+					title: string
+					url?: string
+					username?: string
+				}
+				Update: {
+					author_id?: string
+					content?: string
+					created_at?: string
+					description?: string
+					fts?: unknown | null
+					id?: string
+					level?: number
+					order?: number
+					published?: boolean
+					search?: string | null
+					title?: string
+					url?: string
+					username?: string
+				}
+				Relationships: []
+			}
+			user_tos: {
+				Row: {
+					content: string
+					created_at: string
+					id: string
+					version: number
+				}
+				Insert: {
+					content: string
+					created_at?: string
+					id?: string
+					version?: number
+				}
+				Update: {
+					content?: string
+					created_at?: string
+					id?: string
+					version?: number
+				}
+				Relationships: []
+			}
 		}
 		Views: {
 			[_ in never]: never
 		}
 		Functions: {
-			graphql: {
-				Args: {
-					operationName?: string
-					query?: string
-					variables?: Json
-					extensions?: Json
-				}
-				Returns: Json
-			}
+			[_ in never]: never
 		}
 		Enums: {
 			[_ in never]: never
@@ -28,19 +175,91 @@ export interface Database {
 	}
 	profiles: {
 		Tables: {
+			free_access: {
+				Row: {
+					date_end: string
+					date_start: string
+					id: string
+					product: string
+				}
+				Insert: {
+					date_end?: string
+					date_start?: string
+					id: string
+					product: string
+				}
+				Update: {
+					date_end?: string
+					date_start?: string
+					id?: string
+					product?: string
+				}
+				Relationships: [
+					{
+						foreignKeyName: "free_access_product_fkey"
+						columns: ["product"]
+						isOneToOne: false
+						referencedRelation: "products"
+						referencedColumns: ["id"]
+					},
+					{
+						foreignKeyName: "free_access_user_id_fkey"
+						columns: ["id"]
+						isOneToOne: false
+						referencedRelation: "profiles"
+						referencedColumns: ["id"]
+					}
+				]
+			}
+			free_access_old: {
+				Row: {
+					date_end: string
+					date_start: string
+					id: string
+					product: string
+				}
+				Insert: {
+					date_end?: string
+					date_start?: string
+					id: string
+					product: string
+				}
+				Update: {
+					date_end?: string
+					date_start?: string
+					id?: string
+					product?: string
+				}
+				Relationships: [
+					{
+						foreignKeyName: "profiles_free_access_old_id_fkey"
+						columns: ["id"]
+						isOneToOne: false
+						referencedRelation: "profiles"
+						referencedColumns: ["id"]
+					},
+					{
+						foreignKeyName: "profiles_free_access_old_product_fkey"
+						columns: ["product"]
+						isOneToOne: false
+						referencedRelation: "products"
+						referencedColumns: ["id"]
+					}
+				]
+			}
 			private: {
 				Row: {
-					email: string
+					email: string | null
 					id: string
 					warning: boolean
 				}
 				Insert: {
-					email?: string
+					email?: string | null
 					id: string
 					warning?: boolean
 				}
 				Update: {
-					email?: string
+					email?: string | null
 					id?: string
 					warning?: boolean
 				}
@@ -48,6 +267,7 @@ export interface Database {
 					{
 						foreignKeyName: "private_id_fkey"
 						columns: ["id"]
+						isOneToOne: true
 						referencedRelation: "profiles"
 						referencedColumns: ["id"]
 					}
@@ -56,26 +276,30 @@ export interface Database {
 			profiles: {
 				Row: {
 					avatar: string
+					customer_id: string | null
 					discord: string
 					id: string
-					username: string
+					username: string | null
 				}
 				Insert: {
 					avatar?: string
+					customer_id?: string | null
 					discord?: string
 					id: string
-					username?: string
+					username?: string | null
 				}
 				Update: {
 					avatar?: string
+					customer_id?: string | null
 					discord?: string
 					id?: string
-					username?: string
+					username?: string | null
 				}
 				Relationships: [
 					{
 						foreignKeyName: "profiles_id_fkey"
 						columns: ["id"]
+						isOneToOne: true
 						referencedRelation: "users"
 						referencedColumns: ["id"]
 					}
@@ -125,6 +349,7 @@ export interface Database {
 					{
 						foreignKeyName: "roles_id_fkey"
 						columns: ["id"]
+						isOneToOne: true
 						referencedRelation: "profiles"
 						referencedColumns: ["id"]
 					}
@@ -140,6 +365,7 @@ export interface Database {
 					paypal_id: string | null
 					realname: string | null
 					search: string
+					stripe: string | null
 					url: string
 				}
 				Insert: {
@@ -151,6 +377,7 @@ export interface Database {
 					paypal_id?: string | null
 					realname?: string | null
 					search: string
+					stripe?: string | null
 					url?: string
 				}
 				Update: {
@@ -162,21 +389,132 @@ export interface Database {
 					paypal_id?: string | null
 					realname?: string | null
 					search?: string
+					stripe?: string | null
 					url?: string
 				}
 				Relationships: [
 					{
 						foreignKeyName: "scripters_id_fkey"
 						columns: ["id"]
+						isOneToOne: true
 						referencedRelation: "profiles"
 						referencedColumns: ["id"]
 					}
 				]
 			}
-			subscriptions: {
+			subscription: {
 				Row: {
 					cancel: boolean
-					customer_id: string | null
+					date_end: string
+					date_start: string
+					disabled: boolean
+					id: string
+					price: string
+					product: string
+					subscription: string
+				}
+				Insert: {
+					cancel?: boolean
+					date_end?: string
+					date_start?: string
+					disabled?: boolean
+					id: string
+					price: string
+					product: string
+					subscription: string
+				}
+				Update: {
+					cancel?: boolean
+					date_end?: string
+					date_start?: string
+					disabled?: boolean
+					id?: string
+					price?: string
+					product?: string
+					subscription?: string
+				}
+				Relationships: [
+					{
+						foreignKeyName: "subscription_id_fkey"
+						columns: ["id"]
+						isOneToOne: false
+						referencedRelation: "profiles"
+						referencedColumns: ["id"]
+					},
+					{
+						foreignKeyName: "subscription_price_fkey"
+						columns: ["price"]
+						isOneToOne: false
+						referencedRelation: "prices"
+						referencedColumns: ["id"]
+					},
+					{
+						foreignKeyName: "subscription_product_fkey"
+						columns: ["product"]
+						isOneToOne: false
+						referencedRelation: "products"
+						referencedColumns: ["id"]
+					}
+				]
+			}
+			subscriptions_old: {
+				Row: {
+					cancel: boolean
+					date_end: string
+					date_start: string
+					disabled: boolean
+					id: string
+					price: string
+					product: string
+					subscription: string
+				}
+				Insert: {
+					cancel?: boolean
+					date_end?: string
+					date_start?: string
+					disabled?: boolean
+					id: string
+					price: string
+					product: string
+					subscription: string
+				}
+				Update: {
+					cancel?: boolean
+					date_end?: string
+					date_start?: string
+					disabled?: boolean
+					id?: string
+					price?: string
+					product?: string
+					subscription?: string
+				}
+				Relationships: [
+					{
+						foreignKeyName: "subscriptions_old_id_fkey"
+						columns: ["id"]
+						isOneToOne: false
+						referencedRelation: "profiles"
+						referencedColumns: ["id"]
+					},
+					{
+						foreignKeyName: "subscriptions_old_price_fkey"
+						columns: ["price"]
+						isOneToOne: false
+						referencedRelation: "prices"
+						referencedColumns: ["id"]
+					},
+					{
+						foreignKeyName: "subscriptions_old_product_fkey"
+						columns: ["product"]
+						isOneToOne: false
+						referencedRelation: "products"
+						referencedColumns: ["id"]
+					}
+				]
+			}
+			subscriptions_uc: {
+				Row: {
+					cancel: boolean
 					date_end: string
 					date_start: string
 					external: boolean
@@ -186,7 +524,6 @@ export interface Database {
 				}
 				Insert: {
 					cancel?: boolean
-					customer_id?: string | null
 					date_end?: string
 					date_start?: string
 					external?: boolean
@@ -196,7 +533,6 @@ export interface Database {
 				}
 				Update: {
 					cancel?: boolean
-					customer_id?: string | null
 					date_end?: string
 					date_start?: string
 					external?: boolean
@@ -206,14 +542,9 @@ export interface Database {
 				}
 				Relationships: [
 					{
-						foreignKeyName: "subscriptions_id_fkey"
-						columns: ["id"]
-						referencedRelation: "profiles"
-						referencedColumns: ["id"]
-					},
-					{
-						foreignKeyName: "subscriptions_price_id_fkey"
+						foreignKeyName: "subscriptions_uc_price_id_fkey"
 						columns: ["price_id"]
+						isOneToOne: false
 						referencedRelation: "prices"
 						referencedColumns: ["stripe_id"]
 					}
@@ -221,7 +552,29 @@ export interface Database {
 			}
 		}
 		Views: {
-			[_ in never]: never
+			random_scripters: {
+				Row: {
+					content: string | null
+					description: string | null
+					fts: unknown | null
+					github: string | null
+					id: string | null
+					paypal_id: string | null
+					realname: string | null
+					search: string | null
+					stripe: string | null
+					url: string | null
+				}
+				Relationships: [
+					{
+						foreignKeyName: "scripters_id_fkey"
+						columns: ["id"]
+						isOneToOne: true
+						referencedRelation: "profiles"
+						referencedColumns: ["id"]
+					}
+				]
+			}
 		}
 		Functions: {
 			auth_get_avatar: {
@@ -241,6 +594,31 @@ export interface Database {
 					user_id: string
 				}
 				Returns: string
+			}
+			can_access:
+				| {
+						Args: {
+							accesser_id: string
+							script_id: string
+						}
+						Returns: boolean
+				  }
+				| {
+						Args: {
+							script_id: string
+						}
+						Returns: boolean
+				  }
+			can_view_subscription: {
+				Args: {
+					accesser: string
+					product: string
+				}
+				Returns: boolean
+			}
+			cron_check_subscriptions: {
+				Args: Record<PropertyKey, never>
+				Returns: undefined
 			}
 			get_avatar: {
 				Args: {
@@ -262,15 +640,21 @@ export interface Database {
 			}
 			get_profile:
 				| {
+						Args: Record<PropertyKey, never>
+						Returns: Database["public"]["CompositeTypes"]["profile_data_type"]
+				  }
+				| {
 						Args: {
 							user_id: string
 						}
 						Returns: Database["public"]["CompositeTypes"]["profile_data_type"]
 				  }
-				| {
-						Args: Record<PropertyKey, never>
-						Returns: Database["public"]["CompositeTypes"]["profile_data_type"]
-				  }
+			get_stripe_user: {
+				Args: {
+					user_id: string
+				}
+				Returns: string
+			}
 			get_user_id: {
 				Args: {
 					disc_id: string
@@ -336,112 +720,6 @@ export interface Database {
 	}
 	public: {
 		Tables: {
-			developers: {
-				Row: {
-					content: string | null
-					description: string | null
-					fts: unknown
-					github: string | null
-					id: string
-					paypal_id: string | null
-					realname: string | null
-					search: string
-					url: string
-					search_developers: string | null
-				}
-				Insert: {
-					content?: string | null
-					description?: string | null
-					fts?: unknown
-					github?: string | null
-					id: string
-					paypal_id?: string | null
-					realname?: string | null
-					search: string
-					url: string
-				}
-				Update: {
-					content?: string | null
-					description?: string | null
-					fts?: unknown
-					github?: string | null
-					id?: string
-					paypal_id?: string | null
-					realname?: string | null
-					search?: string
-					url?: string
-				}
-				Relationships: []
-			}
-			faq_errors: {
-				Row: {
-					content: string
-					created_at: string
-					id: number
-					title: string
-				}
-				Insert: {
-					content: string
-					created_at?: string
-					id?: number
-					title: string
-				}
-				Update: {
-					content?: string
-					created_at?: string
-					id?: number
-					title?: string
-				}
-				Relationships: []
-			}
-			faq_questions: {
-				Row: {
-					content: string
-					created_at: string
-					id: number
-					title: string
-				}
-				Insert: {
-					content: string
-					created_at?: string
-					id?: number
-					title: string
-				}
-				Update: {
-					content?: string
-					created_at?: string
-					id?: number
-					title?: string
-				}
-				Relationships: []
-			}
-			packages: {
-				Row: {
-					body: Json | null
-					created_at: string | null
-					id: number
-					name: string | null
-					pkg_file: string | null
-					versions: Json | null
-				}
-				Insert: {
-					body?: Json | null
-					created_at?: string | null
-					id?: number
-					name?: string | null
-					pkg_file?: string | null
-					versions?: Json | null
-				}
-				Update: {
-					body?: Json | null
-					created_at?: string | null
-					id?: number
-					name?: string | null
-					pkg_file?: string | null
-					versions?: Json | null
-				}
-				Relationships: []
-			}
 			prices: {
 				Row: {
 					amount: number
@@ -475,169 +753,40 @@ export interface Database {
 				}
 				Relationships: []
 			}
-			profiles_protected: {
+			stats: {
 				Row: {
-					administrator: boolean
-					cancel_at_period_end: boolean
-					customer_id: string | null
-					developer: boolean
+					experience: number
+					gold: number
 					id: string
-					moderator: boolean
-					premium: boolean
-					price_id: string
-					scripter: boolean
-					subscription_end: string | null
-					subscription_external: boolean
-					subscription_id: string | null
-					subscription_start: string | null
-					tester: boolean
-					timeout: boolean
-					unlocked_ips: number
-					updated_at: string
-					vip: boolean
-				}
-				Insert: {
-					administrator?: boolean
-					cancel_at_period_end?: boolean
-					customer_id?: string | null
-					developer?: boolean
-					id: string
-					moderator?: boolean
-					premium?: boolean
-					price_id?: string
-					scripter?: boolean
-					subscription_end?: string | null
-					subscription_external?: boolean
-					subscription_id?: string | null
-					subscription_start?: string | null
-					tester?: boolean
-					timeout?: boolean
-					unlocked_ips?: number
-					updated_at?: string
-					vip?: boolean
-				}
-				Update: {
-					administrator?: boolean
-					cancel_at_period_end?: boolean
-					customer_id?: string | null
-					developer?: boolean
-					id?: string
-					moderator?: boolean
-					premium?: boolean
-					price_id?: string
-					scripter?: boolean
-					subscription_end?: string | null
-					subscription_external?: boolean
-					subscription_id?: string | null
-					subscription_start?: string | null
-					tester?: boolean
-					timeout?: boolean
-					unlocked_ips?: number
-					updated_at?: string
-					vip?: boolean
-				}
-				Relationships: [
-					{
-						foreignKeyName: "profiles_protected_price_id_fkey"
-						columns: ["price_id"]
-						referencedRelation: "prices"
-						referencedColumns: ["stripe_id"]
-					}
-				]
-			}
-			profiles_public: {
-				Row: {
-					avatar_url: string
-					discord_id: string
-					id: string
-					updated_at: string
+					levels: number
+					password: string
+					runtime: number
+					updated_at: string | null
 					username: string
 				}
 				Insert: {
-					avatar_url: string
-					discord_id: string
+					experience?: number
+					gold?: number
 					id: string
-					updated_at?: string
-					username: string
-				}
-				Update: {
-					avatar_url?: string
-					discord_id?: string
-					id?: string
-					updated_at?: string
+					levels?: number
+					password?: string
+					runtime?: number
+					updated_at?: string | null
 					username?: string
 				}
-				Relationships: [
-					{
-						foreignKeyName: "profiles_public_id_fkey"
-						columns: ["id"]
-						referencedRelation: "users"
-						referencedColumns: ["id"]
-					}
-				]
-			}
-			scripts_public: {
-				Row: {
-					categories: string[]
-					content: string
-					description: string
-					fts: unknown
-					id: string
-					max_gp: number
-					max_xp: number
-					min_gp: number
-					min_xp: number
-					published: boolean
-					search: string
-					subcategories: string[]
-					title: string
-					tooltip_emojis: string[]
-					tooltip_names: string[]
-					updated_at: string
-					url: string
-					search_script: string | null
-				}
-				Insert: {
-					categories: string[]
-					content: string
-					description: string
-					fts?: unknown
-					id?: string
-					max_gp?: number
-					max_xp?: number
-					min_gp?: number
-					min_xp?: number
-					published?: boolean
-					search: string
-					subcategories: string[]
-					title: string
-					tooltip_emojis: string[]
-					tooltip_names: string[]
-					updated_at?: string
-					url: string
-				}
 				Update: {
-					categories?: string[]
-					content?: string
-					description?: string
-					fts?: unknown
+					experience?: number
+					gold?: number
 					id?: string
-					max_gp?: number
-					max_xp?: number
-					min_gp?: number
-					min_xp?: number
-					published?: boolean
-					search?: string
-					subcategories?: string[]
-					title?: string
-					tooltip_emojis?: string[]
-					tooltip_names?: string[]
-					updated_at?: string
-					url?: string
+					levels?: number
+					password?: string
+					runtime?: number
+					updated_at?: string | null
+					username?: string
 				}
 				Relationships: []
 			}
-			stats: {
+			stats_bak: {
 				Row: {
 					experience: number | null
 					gold: number | null
@@ -670,165 +819,17 @@ export interface Database {
 				}
 				Relationships: []
 			}
-			stats_backup: {
+		}
+		Views: {
+			mv_stats_total: {
 				Row: {
 					experience: number | null
 					gold: number | null
-					id: string
 					levels: number | null
-					password: string | null
 					runtime: number | null
-					updated_at: string | null
-					username: string | null
-				}
-				Insert: {
-					experience?: number | null
-					gold?: number | null
-					id: string
-					levels?: number | null
-					password?: string | null
-					runtime?: number | null
-					updated_at?: string | null
-					username?: string | null
-				}
-				Update: {
-					experience?: number | null
-					gold?: number | null
-					id?: string
-					levels?: number | null
-					password?: string | null
-					runtime?: number | null
-					updated_at?: string | null
-					username?: string | null
 				}
 				Relationships: []
 			}
-			stats_scripts: {
-				Row: {
-					current_users: Json[]
-					experience: number
-					gold: number | null
-					levels: number | null
-					monthly_downloads: string[]
-					monthly_users: Json[]
-					monthly_users_last_update: string
-					previous_months_downloads: string[]
-					runtime: number | null
-					script_id: string
-					total_current_users: number | null
-					total_monthly_downloads: number | null
-					total_monthly_users: number | null
-					total_unique_downloads: number | null
-					total_unique_users: number | null
-					unique_downloads: string[]
-					unique_users: string[]
-				}
-				Insert: {
-					current_users?: Json[]
-					experience?: number
-					gold?: number | null
-					levels?: number | null
-					monthly_downloads?: string[]
-					monthly_users?: Json[]
-					monthly_users_last_update?: string
-					previous_months_downloads?: string[]
-					runtime?: number | null
-					script_id: string
-					total_current_users?: number | null
-					total_monthly_downloads?: number | null
-					total_monthly_users?: number | null
-					total_unique_downloads?: number | null
-					total_unique_users?: number | null
-					unique_downloads?: string[]
-					unique_users?: string[]
-				}
-				Update: {
-					current_users?: Json[]
-					experience?: number
-					gold?: number | null
-					levels?: number | null
-					monthly_downloads?: string[]
-					monthly_users?: Json[]
-					monthly_users_last_update?: string
-					previous_months_downloads?: string[]
-					runtime?: number | null
-					script_id?: string
-					total_current_users?: number | null
-					total_monthly_downloads?: number | null
-					total_monthly_users?: number | null
-					total_unique_downloads?: number | null
-					total_unique_users?: number | null
-					unique_downloads?: string[]
-					unique_users?: string[]
-				}
-				Relationships: [
-					{
-						foreignKeyName: "stats_scripts_script_id_fkey"
-						columns: ["script_id"]
-						referencedRelation: "scripts_public"
-						referencedColumns: ["id"]
-					}
-				]
-			}
-			tutorials: {
-				Row: {
-					author_id: string
-					content: string
-					created_at: string
-					description: string
-					fts: unknown
-					id: string
-					level: number
-					order: number
-					published: boolean
-					search: string
-					title: string
-					url: string
-					username: string
-					search_tutorials: string | null
-				}
-				Insert: {
-					author_id: string
-					content: string
-					created_at?: string
-					description: string
-					fts?: unknown
-					id?: string
-					level?: number
-					order?: number
-					published?: boolean
-					search: string
-					title: string
-					url: string
-					username?: string
-				}
-				Update: {
-					author_id?: string
-					content?: string
-					created_at?: string
-					description?: string
-					fts?: unknown
-					id?: string
-					level?: number
-					order?: number
-					published?: boolean
-					search?: string
-					title?: string
-					url?: string
-					username?: string
-				}
-				Relationships: [
-					{
-						foreignKeyName: "tutorials_author_id_fkey"
-						columns: ["author_id"]
-						referencedRelation: "profiles"
-						referencedColumns: ["id"]
-					}
-				]
-			}
-		}
-		Views: {
-			[_ in never]: never
 		}
 		Functions: {
 			_array_remove: {
@@ -854,7 +855,13 @@ export interface Database {
 				Args: {
 					a: string[]
 				}
-				Returns: unknown
+				Returns: string[]
+			}
+			delete_user: {
+				Args: {
+					user_to_delete: string
+				}
+				Returns: undefined
 			}
 			encode_seo: {
 				Args: {
@@ -874,14 +881,14 @@ export interface Database {
 						Args: {
 							text_array: string[]
 						}
-						Returns: unknown
+						Returns: string[]
 				  }
 				| {
 						Args: {
 							text_array: string[]
 							limit_val: number
 						}
-						Returns: unknown
+						Returns: string[]
 				  }
 			get_stats_total: {
 				Args: Record<PropertyKey, never>
@@ -892,6 +899,21 @@ export interface Database {
 					runtime: number
 				}[]
 			}
+			insert_ten_year_sub:
+				| {
+						Args: {
+							start: number
+							user_ids: string[]
+						}
+						Returns: undefined
+				  }
+				| {
+						Args: {
+							start: number
+							user_ids: string[]
+						}
+						Returns: undefined
+				  }
 			is_dashboard: {
 				Args: Record<PropertyKey, never>
 				Returns: boolean
@@ -902,21 +924,9 @@ export interface Database {
 				}
 				Returns: boolean
 			}
-			search_developers: {
+			normalize_nfkc: {
 				Args: {
-					"": unknown
-				}
-				Returns: string
-			}
-			search_script: {
-				Args: {
-					"": unknown
-				}
-				Returns: string
-			}
-			search_tutorials: {
-				Args: {
-					"": unknown
+					input: string
 				}
 				Returns: string
 			}
@@ -926,34 +936,79 @@ export interface Database {
 		}
 		CompositeTypes: {
 			profile_data_type: {
-				id: string
-				username: string
-				avatar_url: string
-				updated_at: string
-				discord_id: string
-				developer: boolean
-				premium: boolean
-				vip: boolean
-				tester: boolean
-				moderator: boolean
-				administrator: boolean
-				unlocked_ips: number
-				scripter: boolean
-				timeout: boolean
-				subscription_external: boolean
-				subscription_start: string
-				subscription_end: string
-				subscription_id: string
-				cancel_at_period_end: boolean
-				customer_id: string
-				price_id: string
-				dismissed_warning: boolean
-				email: string
+				id: string | null
+				username: string | null
+				avatar_url: string | null
+				updated_at: string | null
+				discord_id: string | null
+				developer: boolean | null
+				premium: boolean | null
+				vip: boolean | null
+				tester: boolean | null
+				moderator: boolean | null
+				administrator: boolean | null
+				unlocked_ips: number | null
+				scripter: boolean | null
+				timeout: boolean | null
+				subscription_external: boolean | null
+				subscription_start: string | null
+				subscription_end: string | null
+				subscription_id: string | null
+				cancel_at_period_end: boolean | null
+				customer_id: string | null
+				price_id: string | null
+				dismissed_warning: boolean | null
+				email: string | null
 			}
 		}
 	}
 	scripts: {
 		Tables: {
+			bundles: {
+				Row: {
+					id: string
+					name: string
+					product: string | null
+					quantity: number | null
+					scripts: string[]
+					user_id: string
+					username: string | null
+				}
+				Insert: {
+					id?: string
+					name?: string
+					product?: string | null
+					quantity?: number | null
+					scripts: string[]
+					user_id: string
+					username?: string | null
+				}
+				Update: {
+					id?: string
+					name?: string
+					product?: string | null
+					quantity?: number | null
+					scripts?: string[]
+					user_id?: string
+					username?: string | null
+				}
+				Relationships: [
+					{
+						foreignKeyName: "bundles_product_fkey"
+						columns: ["product"]
+						isOneToOne: true
+						referencedRelation: "products"
+						referencedColumns: ["id"]
+					},
+					{
+						foreignKeyName: "bundles_user_id_fkey"
+						columns: ["user_id"]
+						isOneToOne: false
+						referencedRelation: "profiles"
+						referencedColumns: ["id"]
+					}
+				]
+			}
 			categories: {
 				Row: {
 					emoji: string
@@ -969,6 +1024,123 @@ export interface Database {
 				}
 				Relationships: []
 			}
+			featured: {
+				Row: {
+					id: string
+					name: string
+				}
+				Insert: {
+					id?: string
+					name: string
+				}
+				Update: {
+					id?: string
+					name?: string
+				}
+				Relationships: [
+					{
+						foreignKeyName: "featured_id_fkey"
+						columns: ["id"]
+						isOneToOne: true
+						referencedRelation: "scripts"
+						referencedColumns: ["id"]
+					}
+				]
+			}
+			prices: {
+				Row: {
+					active: boolean
+					amount: number
+					currency: string
+					id: string
+					interval: string
+					product: string
+				}
+				Insert: {
+					active?: boolean
+					amount: number
+					currency?: string
+					id: string
+					interval: string
+					product: string
+				}
+				Update: {
+					active?: boolean
+					amount?: number
+					currency?: string
+					id?: string
+					interval?: string
+					product?: string
+				}
+				Relationships: [
+					{
+						foreignKeyName: "prices_product_fkey"
+						columns: ["product"]
+						isOneToOne: false
+						referencedRelation: "products"
+						referencedColumns: ["id"]
+					}
+				]
+			}
+			products: {
+				Row: {
+					active: boolean
+					bundle: string | null
+					id: string
+					name: string
+					script: string | null
+					stripe_user: string | null
+					user_id: string
+				}
+				Insert: {
+					active?: boolean
+					bundle?: string | null
+					id: string
+					name: string
+					script?: string | null
+					stripe_user?: string | null
+					user_id: string
+				}
+				Update: {
+					active?: boolean
+					bundle?: string | null
+					id?: string
+					name?: string
+					script?: string | null
+					stripe_user?: string | null
+					user_id?: string
+				}
+				Relationships: [
+					{
+						foreignKeyName: "products_bundle_fkey"
+						columns: ["bundle"]
+						isOneToOne: true
+						referencedRelation: "bundles"
+						referencedColumns: ["id"]
+					},
+					{
+						foreignKeyName: "products_script_fkey"
+						columns: ["script"]
+						isOneToOne: true
+						referencedRelation: "scripts"
+						referencedColumns: ["id"]
+					},
+					{
+						foreignKeyName: "products_user_id_fkey"
+						columns: ["user_id"]
+						isOneToOne: false
+						referencedRelation: "random_scripters"
+						referencedColumns: ["id"]
+					},
+					{
+						foreignKeyName: "products_user_id_fkey"
+						columns: ["user_id"]
+						isOneToOne: false
+						referencedRelation: "scripters"
+						referencedColumns: ["id"]
+					}
+				]
+			}
 			protected: {
 				Row: {
 					assets: string
@@ -978,7 +1150,7 @@ export interface Database {
 					id: string
 					revision: number
 					revision_date: string
-					username: string | null
+					username: string
 				}
 				Insert: {
 					assets?: string
@@ -988,7 +1160,7 @@ export interface Database {
 					id: string
 					revision?: number
 					revision_date?: string
-					username?: string | null
+					username?: string
 				}
 				Update: {
 					assets?: string
@@ -998,18 +1170,20 @@ export interface Database {
 					id?: string
 					revision?: number
 					revision_date?: string
-					username?: string | null
+					username?: string
 				}
 				Relationships: [
 					{
 						foreignKeyName: "protected_author_id_fkey"
 						columns: ["author_id"]
-						referencedRelation: "profiles_public"
+						isOneToOne: false
+						referencedRelation: "profiles"
 						referencedColumns: ["id"]
 					},
 					{
 						foreignKeyName: "protected_id_fkey"
 						columns: ["id"]
+						isOneToOne: true
 						referencedRelation: "scripts"
 						referencedColumns: ["id"]
 					}
@@ -1027,6 +1201,7 @@ export interface Database {
 					max_xp: number
 					min_gp: number
 					min_xp: number
+					product: string | null
 					published: boolean
 					search: string
 					subcategories: string[]
@@ -1046,6 +1221,7 @@ export interface Database {
 					max_xp?: number
 					min_gp?: number
 					min_xp?: number
+					product?: string | null
 					published?: boolean
 					search?: string
 					subcategories?: string[]
@@ -1065,6 +1241,7 @@ export interface Database {
 					max_xp?: number
 					min_gp?: number
 					min_xp?: number
+					product?: string | null
 					published?: boolean
 					search?: string
 					subcategories?: string[]
@@ -1073,7 +1250,15 @@ export interface Database {
 					tooltip_names?: string[]
 					url?: string | null
 				}
-				Relationships: []
+				Relationships: [
+					{
+						foreignKeyName: "scripts_product_fkey"
+						columns: ["product"]
+						isOneToOne: true
+						referencedRelation: "products"
+						referencedColumns: ["id"]
+					}
+				]
 			}
 			stats_simba: {
 				Row: {
@@ -1090,7 +1275,7 @@ export interface Database {
 				Insert: {
 					experience?: number
 					gold?: number
-					id?: string
+					id: string
 					levels?: number
 					online_users?: Json[]
 					online_users_total?: number
@@ -1113,6 +1298,7 @@ export interface Database {
 					{
 						foreignKeyName: "stats_simba_id_fkey"
 						columns: ["id"]
+						isOneToOne: true
 						referencedRelation: "scripts"
 						referencedColumns: ["id"]
 					}
@@ -1126,6 +1312,7 @@ export interface Database {
 					month_downloads_total: number
 					month_reports: string[]
 					month_reports_total: number
+					notified: boolean
 					previous_months: Json[]
 					unique_downloads: string[]
 					unique_downloads_total: number
@@ -1137,6 +1324,7 @@ export interface Database {
 					month_downloads_total?: number
 					month_reports?: string[]
 					month_reports_total?: number
+					notified?: boolean
 					previous_months?: Json[]
 					unique_downloads?: string[]
 					unique_downloads_total?: number
@@ -1148,6 +1336,7 @@ export interface Database {
 					month_downloads_total?: number
 					month_reports?: string[]
 					month_reports_total?: number
+					notified?: boolean
 					previous_months?: Json[]
 					unique_downloads?: string[]
 					unique_downloads_total?: number
@@ -1156,6 +1345,7 @@ export interface Database {
 					{
 						foreignKeyName: "stats_site_id_fkey"
 						columns: ["id"]
+						isOneToOne: true
 						referencedRelation: "scripts"
 						referencedColumns: ["id"]
 					}
@@ -1181,6 +1371,7 @@ export interface Database {
 					{
 						foreignKeyName: "subcategories_category_fkey"
 						columns: ["category"]
+						isOneToOne: false
 						referencedRelation: "categories"
 						referencedColumns: ["name"]
 					}
@@ -1212,25 +1403,50 @@ export interface Database {
 				}
 				Returns: undefined
 			}
+			bundle_contains: {
+				Args: {
+					bundle: string
+					script: string
+				}
+				Returns: boolean
+			}
+			cron_refresh_featured: {
+				Args: Record<PropertyKey, never>
+				Returns: undefined
+			}
 			fix_categories:
 				| {
 						Args: {
 							categories: string[]
 						}
-						Returns: unknown
+						Returns: string[]
 				  }
 				| {
 						Args: {
 							user_id: string
 							categories: string[]
 						}
-						Returns: unknown
+						Returns: string[]
 				  }
 			get_assets: {
 				Args: {
 					script_id: string
 				}
 				Returns: string
+			}
+			get_bundle_scripts: {
+				Args: {
+					ids: string[]
+				}
+				Returns: string[]
+			}
+			get_month_downloads_total: {
+				Args: Record<PropertyKey, never>
+				Returns: number
+			}
+			get_month_premium_downloads_total: {
+				Args: Record<PropertyKey, never>
+				Returns: number
 			}
 			get_revision: {
 				Args: {
@@ -1244,19 +1460,43 @@ export interface Database {
 				}
 				Returns: string
 			}
+			get_site_stats: {
+				Args: {
+					user_id: string
+				}
+				Returns: {
+					total_scripts: number
+					total_user_scripts: number
+					user_scripts: string[]
+					total_premium_scripts: number
+					total_user_premium_scripts: number
+					month_downloads: number
+					month_user_downloads: number
+					month_premium_downloads: number
+					month_premium_user_downloads: number
+				}[]
+			}
 			get_tooltip_emojis: {
 				Args: {
 					categories: string[]
 					subcategories: string[]
 				}
-				Returns: unknown
+				Returns: string[]
 			}
 			get_tooltip_names: {
 				Args: {
 					categories: string[]
 					subcategories: string[]
 				}
-				Returns: unknown
+				Returns: string[]
+			}
+			get_user_scripts: {
+				Args: {
+					user_id: string
+				}
+				Returns: {
+					id: string
+				}[]
 			}
 			get_virtual_level: {
 				Args: {
@@ -1268,13 +1508,13 @@ export interface Database {
 				| {
 						Args: {
 							script_id: string
-							user_id: string
 						}
 						Returns: boolean
 				  }
 				| {
 						Args: {
 							script_id: string
+							user_id: string
 						}
 						Returns: boolean
 				  }
@@ -1290,6 +1530,10 @@ export interface Database {
 				}
 				Returns: boolean
 			}
+			stats_site_monthly_reset: {
+				Args: Record<PropertyKey, never>
+				Returns: undefined
+			}
 			storage_can_download: {
 				Args: {
 					file_path: string
@@ -1297,6 +1541,12 @@ export interface Database {
 				Returns: boolean
 			}
 			storage_can_edit: {
+				Args: {
+					file_path: string
+				}
+				Returns: boolean
+			}
+			storage_img_can_edit: {
 				Args: {
 					file_path: string
 				}
@@ -1321,6 +1571,7 @@ export interface Database {
 					id: string
 					name: string
 					owner: string | null
+					owner_id: string | null
 					public: boolean | null
 					updated_at: string | null
 				}
@@ -1332,6 +1583,7 @@ export interface Database {
 					id: string
 					name: string
 					owner?: string | null
+					owner_id?: string | null
 					public?: boolean | null
 					updated_at?: string | null
 				}
@@ -1343,17 +1595,11 @@ export interface Database {
 					id?: string
 					name?: string
 					owner?: string | null
+					owner_id?: string | null
 					public?: boolean | null
 					updated_at?: string | null
 				}
-				Relationships: [
-					{
-						foreignKeyName: "buckets_owner_fkey"
-						columns: ["owner"]
-						referencedRelation: "users"
-						referencedColumns: ["id"]
-					}
-				]
+				Relationships: []
 			}
 			migrations: {
 				Row: {
@@ -1385,6 +1631,7 @@ export interface Database {
 					metadata: Json | null
 					name: string | null
 					owner: string | null
+					owner_id: string | null
 					path_tokens: string[] | null
 					updated_at: string | null
 					version: string | null
@@ -1397,6 +1644,7 @@ export interface Database {
 					metadata?: Json | null
 					name?: string | null
 					owner?: string | null
+					owner_id?: string | null
 					path_tokens?: string[] | null
 					updated_at?: string | null
 					version?: string | null
@@ -1409,6 +1657,7 @@ export interface Database {
 					metadata?: Json | null
 					name?: string | null
 					owner?: string | null
+					owner_id?: string | null
 					path_tokens?: string[] | null
 					updated_at?: string | null
 					version?: string | null
@@ -1417,13 +1666,103 @@ export interface Database {
 					{
 						foreignKeyName: "objects_bucketId_fkey"
 						columns: ["bucket_id"]
+						isOneToOne: false
+						referencedRelation: "buckets"
+						referencedColumns: ["id"]
+					}
+				]
+			}
+			s3_multipart_uploads: {
+				Row: {
+					bucket_id: string
+					created_at: string
+					id: string
+					in_progress_size: number
+					key: string
+					owner_id: string | null
+					upload_signature: string
+					version: string
+				}
+				Insert: {
+					bucket_id: string
+					created_at?: string
+					id: string
+					in_progress_size?: number
+					key: string
+					owner_id?: string | null
+					upload_signature: string
+					version: string
+				}
+				Update: {
+					bucket_id?: string
+					created_at?: string
+					id?: string
+					in_progress_size?: number
+					key?: string
+					owner_id?: string | null
+					upload_signature?: string
+					version?: string
+				}
+				Relationships: [
+					{
+						foreignKeyName: "s3_multipart_uploads_bucket_id_fkey"
+						columns: ["bucket_id"]
+						isOneToOne: false
+						referencedRelation: "buckets"
+						referencedColumns: ["id"]
+					}
+				]
+			}
+			s3_multipart_uploads_parts: {
+				Row: {
+					bucket_id: string
+					created_at: string
+					etag: string
+					id: string
+					key: string
+					owner_id: string | null
+					part_number: number
+					size: number
+					upload_id: string
+					version: string
+				}
+				Insert: {
+					bucket_id: string
+					created_at?: string
+					etag: string
+					id?: string
+					key: string
+					owner_id?: string | null
+					part_number: number
+					size?: number
+					upload_id: string
+					version: string
+				}
+				Update: {
+					bucket_id?: string
+					created_at?: string
+					etag?: string
+					id?: string
+					key?: string
+					owner_id?: string | null
+					part_number?: number
+					size?: number
+					upload_id?: string
+					version?: string
+				}
+				Relationships: [
+					{
+						foreignKeyName: "s3_multipart_uploads_parts_bucket_id_fkey"
+						columns: ["bucket_id"]
+						isOneToOne: false
 						referencedRelation: "buckets"
 						referencedColumns: ["id"]
 					},
 					{
-						foreignKeyName: "objects_owner_fkey"
-						columns: ["owner"]
-						referencedRelation: "users"
+						foreignKeyName: "s3_multipart_uploads_parts_upload_id_fkey"
+						columns: ["upload_id"]
+						isOneToOne: false
+						referencedRelation: "s3_multipart_uploads"
 						referencedColumns: ["id"]
 					}
 				]
@@ -1458,7 +1797,7 @@ export interface Database {
 				Args: {
 					name: string
 				}
-				Returns: unknown
+				Returns: string[]
 			}
 			get_size_by_bucket: {
 				Args: Record<PropertyKey, never>
@@ -1466,6 +1805,41 @@ export interface Database {
 					size: number
 					bucket_id: string
 				}[]
+			}
+			list_multipart_uploads_with_delimiter: {
+				Args: {
+					bucket_id: string
+					prefix_param: string
+					delimiter_param: string
+					max_keys?: number
+					next_key_token?: string
+					next_upload_token?: string
+				}
+				Returns: {
+					key: string
+					id: string
+					created_at: string
+				}[]
+			}
+			list_objects_with_delimiter: {
+				Args: {
+					bucket_id: string
+					prefix_param: string
+					delimiter_param: string
+					max_keys?: number
+					start_after?: string
+					next_token?: string
+				}
+				Returns: {
+					name: string
+					id: string
+					metadata: Json
+					updated_at: string
+				}[]
+			}
+			operation: {
+				Args: Record<PropertyKey, never>
+				Returns: string
 			}
 			search: {
 				Args: {
@@ -1496,3 +1870,77 @@ export interface Database {
 		}
 	}
 }
+
+type PublicSchema = Database[Extract<keyof Database, "public">]
+
+export type Tables<
+	PublicTableNameOrOptions extends
+		| keyof (PublicSchema["Tables"] & PublicSchema["Views"])
+		| { schema: keyof Database },
+	TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
+		? keyof (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
+				Database[PublicTableNameOrOptions["schema"]]["Views"])
+		: never = never
+> = PublicTableNameOrOptions extends { schema: keyof Database }
+	? (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
+			Database[PublicTableNameOrOptions["schema"]]["Views"])[TableName] extends {
+			Row: infer R
+	  }
+		? R
+		: never
+	: PublicTableNameOrOptions extends keyof (PublicSchema["Tables"] & PublicSchema["Views"])
+	? (PublicSchema["Tables"] & PublicSchema["Views"])[PublicTableNameOrOptions] extends {
+			Row: infer R
+	  }
+		? R
+		: never
+	: never
+
+export type TablesInsert<
+	PublicTableNameOrOptions extends keyof PublicSchema["Tables"] | { schema: keyof Database },
+	TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
+		? keyof Database[PublicTableNameOrOptions["schema"]]["Tables"]
+		: never = never
+> = PublicTableNameOrOptions extends { schema: keyof Database }
+	? Database[PublicTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+			Insert: infer I
+	  }
+		? I
+		: never
+	: PublicTableNameOrOptions extends keyof PublicSchema["Tables"]
+	? PublicSchema["Tables"][PublicTableNameOrOptions] extends {
+			Insert: infer I
+	  }
+		? I
+		: never
+	: never
+
+export type TablesUpdate<
+	PublicTableNameOrOptions extends keyof PublicSchema["Tables"] | { schema: keyof Database },
+	TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
+		? keyof Database[PublicTableNameOrOptions["schema"]]["Tables"]
+		: never = never
+> = PublicTableNameOrOptions extends { schema: keyof Database }
+	? Database[PublicTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+			Update: infer U
+	  }
+		? U
+		: never
+	: PublicTableNameOrOptions extends keyof PublicSchema["Tables"]
+	? PublicSchema["Tables"][PublicTableNameOrOptions] extends {
+			Update: infer U
+	  }
+		? U
+		: never
+	: never
+
+export type Enums<
+	PublicEnumNameOrOptions extends keyof PublicSchema["Enums"] | { schema: keyof Database },
+	EnumName extends PublicEnumNameOrOptions extends { schema: keyof Database }
+		? keyof Database[PublicEnumNameOrOptions["schema"]]["Enums"]
+		: never = never
+> = PublicEnumNameOrOptions extends { schema: keyof Database }
+	? Database[PublicEnumNameOrOptions["schema"]]["Enums"][EnumName]
+	: PublicEnumNameOrOptions extends keyof PublicSchema["Enums"]
+	? PublicSchema["Enums"][PublicEnumNameOrOptions]
+	: never

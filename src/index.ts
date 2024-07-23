@@ -48,9 +48,13 @@ async function main() {
 async function login() {
 	const cookies = (await xenNode.xenLogin(env.SYTHE_USER, env.SYTHE_PASS)) as string[]
 
+	const timestamp = new Date().toISOString().replace("T", " ").replace("Z", "")
+	console.log("[", timestamp, "]: Logging in. ")
+
 	try {
 		const isLogged = await xenNode.checkLogin(cookies)
-		console.log(isLogged)
+		const timestamp = new Date().toISOString().replace("T", " ").replace("Z", "")
+		console.log("[", timestamp, "]: Did login? ", isLogged)
 	} catch (error: any) {
 		if (error.isAxiosError) console.error(error)
 	}
@@ -167,6 +171,9 @@ async function editMainPost(
 
 	editPostOutPut = `${editPostOutPut} \n\n ${totalStats} \n\n ${premium} \n\n ${free}`
 
+	const timestamp = new Date().toISOString().replace("T", " ").replace("Z", "")
+	console.log("[", timestamp, "]: Editing the post: ", postID)
+
 	if (env.ENVIRONMENT === "production") {
 		try {
 			await xenNode.editPost(editPostOutPut, `${postID}/save#`)
@@ -205,6 +212,9 @@ async function bumpThread(threadID: string, premiumItems: Script[], freeItems: S
 	}
 
 	const bumpOutPut: string = `Bump, check out [URL='https://waspscripts.com/'][B]WaspScripts[/B][/URL]. \n\nCheck out some of the scripts we have to offer: \n\n ${premium} \n\n ${free}`
+
+	const timestamp = new Date().toISOString().replace("T", " ").replace("Z", "")
+	console.log("[", timestamp, "]: Posting on thread: ", threadID)
 
 	if (env.ENVIRONMENT == "production") {
 		try {
