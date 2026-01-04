@@ -1,5 +1,5 @@
 import "./lib/alias"
-import env from "$lib/env"
+import "$lib/env"
 import { createClient } from "@supabase/supabase-js"
 import { Database } from "$lib/types/supabase"
 import XenNode from "xen-node"
@@ -8,37 +8,51 @@ import { Script, TotalStats } from "$lib/types/collection"
 
 //Init env Vars
 const options = { auth: { autoRefreshToken: true, persistSession: false } }
-export const supabase = createClient<Database>(env.SUPABASE_URL, env.SUPABASE_ANON_KEY, options)
+export const supabase = createClient<Database>(
+	process.env.SUPABASE_URL,
+	process.env.SUPABASE_ANON_KEY,
+	options
+)
 
 const xenNode = new XenNode("https://www.sythe.org/", {
 	verbose: console.log,
-	username: env.SYTHE_USER,
-	password: env.SYTHE_PASS
+	username: process.env.SYTHE_USER,
+	password: process.env.SYTHE_PASS
 })
 
 main()
 
 async function main() {
 	//Loop throught in..
-	const bumpInterval = parseInt(env.BUMP_HOUR_INTERVAL) * 60 * 60 * 1000
-	const editInterval = parseInt(env.EDIT_MINUTE_INTERVAL) * 60 * 1000
+	const bumpInterval = parseInt(process.env.BUMP_HOUR_INTERVAL) * 60 * 60 * 1000
+	const editInterval = parseInt(process.env.EDIT_MINUTE_INTERVAL) * 60 * 1000
 	const loginInterval = 24 * 60 * 60 * 1000 //24 h
 
 	let data = await getData()
 	await login()
-	if (env.ENVIRONMENT === "development") {
-		await editMainPost(env.SYTHE_POST, data.premiumItems, data.freeItems, data.totalStatData)
-		await bumpThread(env.SYTHE_THREAD, data.premiumItems, data.freeItems)
-	} else if (env.ENVIRONMENT === "production") {
+	if (process.env.ENVIRONMENT === "development") {
+		await editMainPost(
+			process.env.SYTHE_POST,
+			data.premiumItems,
+			data.freeItems,
+			data.totalStatData
+		)
+		await bumpThread(process.env.SYTHE_THREAD, data.premiumItems, data.freeItems)
+	} else if (process.env.ENVIRONMENT === "production") {
 		setInterval(async () => await login(), loginInterval)
 
 		setInterval(async () => {
 			data = (await getData()) ?? data
-			await editMainPost(env.SYTHE_POST, data.premiumItems, data.freeItems, data.totalStatData)
+			await editMainPost(
+				process.env.SYTHE_POST,
+				data.premiumItems,
+				data.freeItems,
+				data.totalStatData
+			)
 		}, editInterval)
 
 		setInterval(
-			async () => await bumpThread(env.SYTHE_THREAD, data.premiumItems, data.freeItems),
+			async () => await bumpThread(process.env.SYTHE_THREAD, data.premiumItems, data.freeItems),
 			bumpInterval
 		)
 	}
@@ -46,7 +60,10 @@ async function main() {
 
 //login and get cookies
 async function login() {
-	const cookies = (await xenNode.xenLogin(env.SYTHE_USER, env.SYTHE_PASS)) as string[]
+	const cookies = (await xenNode.xenLogin(
+		process.env.SYTHE_USER,
+		process.env.SYTHE_PASS
+	)) as string[]
 
 	const timestamp = new Date().toISOString().replace("T", " ").replace("Z", "")
 	console.log("[", timestamp, "]: Logging in. ")
@@ -174,13 +191,13 @@ async function editMainPost(
 	const timestamp = new Date().toISOString().replace("T", " ").replace("Z", "")
 	console.log("[", timestamp, "]: Editing the post: ", postID)
 
-	if (env.ENVIRONMENT === "production") {
+	if (process.env.ENVIRONMENT === "production") {
 		try {
 			await xenNode.editPost(editPostOutPut, `${postID}/save#`)
 		} catch (error: any) {
 			if (error.isAxiosError) console.error(error)
 		}
-	} else if (env.ENVIRONMENT == "development") {
+	} else if (process.env.ENVIRONMENT == "development") {
 		console.log(editPostOutPut)
 	}
 }
@@ -216,13 +233,13 @@ async function bumpThread(threadID: string, premiumItems: Script[], freeItems: S
 	const timestamp = new Date().toISOString().replace("T", " ").replace("Z", "")
 	console.log("[", timestamp, "]: Posting on thread: ", threadID)
 
-	if (env.ENVIRONMENT == "production") {
+	if (process.env.ENVIRONMENT == "production") {
 		try {
 			await xenNode.post(bumpOutPut, threadID)
 		} catch (error: any) {
 			if (error.isAxiosError) console.error(error)
 		}
-	} else if (env.ENVIRONMENT == "development") {
+	} else if (process.env.ENVIRONMENT == "development") {
 		console.log(bumpOutPut)
 	}
 }

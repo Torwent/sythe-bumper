@@ -11,6 +11,9 @@ importers:
       '@supabase/supabase-js':
         specifier: ^2.44.4
         version: 2.44.4(bufferutil@4.0.7)(utf-8-validate@5.0.10)
+      dotenv:
+        specifier: ^16.4.5
+        version: 16.4.5
       xen-node:
         specifier: ^1.0.6
         version: 1.0.6
@@ -27,9 +30,6 @@ importers:
       '@typescript-eslint/parser':
         specifier: ^6.21.0
         version: 6.21.0(eslint@8.57.0)(typescript@5.5.4)
-      dotenv:
-        specifier: ^16.4.5
-        version: 16.4.5
       eslint:
         specifier: ^8.57.0
         version: 8.57.0

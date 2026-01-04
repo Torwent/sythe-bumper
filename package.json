@@ -22,7 +22,6 @@
 		"@types/node": "^20.14.11",
 		"@typescript-eslint/eslint-plugin": "^6.21.0",
 		"@typescript-eslint/parser": "^6.21.0",
-		"dotenv": "^16.4.5",
 		"eslint": "^8.57.0",
 		"eslint-config-prettier": "^9.1.0",
 		"module-alias": "^2.2.3",
@@ -35,6 +34,7 @@
 	},
 	"dependencies": {
 		"@supabase/supabase-js": "^2.44.4",
-		"xen-node": "^1.0.6"
+		"xen-node": "^1.0.6",
+		"dotenv": "^16.4.5"
 	}
 }
